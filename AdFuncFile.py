@@ -51,7 +51,7 @@ class clCharacter:
     chFindChance = 0
     chKnowChance = 0
     chFleeChance = 0
-    chBattleRestore = 16    
+    chBattleRestore = 20    
     chVitality = 0
     chStrength = 0
     chAccuracy = 0
