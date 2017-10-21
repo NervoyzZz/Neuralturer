@@ -1,14 +1,16 @@
 # Neuralturer game
 # File with useful functional
 
+from random import randint
+
 class clWeapon:
     """ Weapon class
-        There are
+        There is wpGeneralParam with keys:
         str Name
         int MinDamage, MaxDamage
         int AttackSpeed
         methods:
-        ShowInfo
+        wpShowInfo()
     """
 
     __wpGeneralParam = 0
@@ -29,11 +31,11 @@ class clWeapon:
 
 class clArmour:
     """ Armour class
-        There are
+        There is arGeneralParam with keys:
         str Name
         int HealthBoost, SpeedBoost
         methods:
-        ShowInfo
+        arShowInfo()
     """
     __arGeneralParam = 0
     def __init__(self, Name = 'None', HealthBoost = 0, SpeedBoost = 0):
@@ -53,7 +55,7 @@ class clArmour:
 def chHowMuchExpNeed(CurLvL):
     ''' Show how much experience Character needs for new Level
         Just interesting formula.
-        Exec it on the loop and see what it return. It's nice
+        Exec it on the loop and see what it return. It's nice.
     '''
     if CurLvL <= 1:
         return 0
@@ -64,12 +66,20 @@ def chHowMuchExpNeed(CurLvL):
             k = CurLvL//10*10
         return chHowMuchExpNeed(CurLvL-1) + k
 
-
+def CountProbability(percent):
+    ''' Count probability of starting event
+        if event can start => return 1 else return 0
+    '''
+    randomNumber = randint(1, 10000)
+    if randomNumber <= percent * 100:
+        return 1
+    else:
+        return 0
 
 class clCharacter:
     """ Character class
         There are:
-        General Params:
+        chGeneralParams:
         str Name - name of Character
         int CHealth, MHealth - Current and Max Health of Character
         int MinDamage, MaxDamage - damage of Character
@@ -79,8 +89,8 @@ class clCharacter:
         int Gold - gold of Character
         int Level - Level of character
         int Experience - experience of Character
-        clWeapon Weapon - weapon that character uses
-        clArmour Armour - armour that character wears
+        clWeapon chWeapon - weapon that character uses
+        clArmour chArmour - armour that character wears
         int HitChance - chance to hit the enemy
         int AttackSpeed - if you have A*[Enemy]chAttackSpeed then you hit A times
         int FindChance - chance to find interesting in others places
@@ -89,7 +99,7 @@ class clCharacter:
         int BattleRestore - percent of chHelth restore after every battle
 
         Every new level player gets 1 point. At the first level player has 3 points
-        You can increase next traits:
+        You can increase next chCommonTrait:
         int Vitality - each point increase chHealth by 5
         int Strength - each point increase chDamage by 2
         int Accuracy - each point increase chHitChance by 5
@@ -100,7 +110,7 @@ class clCharacter:
         int Intelligence - each point increase chPotionRestore by 1
         int Instinct - each point increase chFleeChance by 10
 
-        Every 10 levels player gets 1 point to spend it to special traits:
+        Every 10 levels player gets 1 point to spend it to chSpecialTrait:
         int Undead - every point increase chHealth by 20
         int Carrier - every point increase chMaxPotions by 2
         int QuickHand - every point increase chSpeed by 20
@@ -112,6 +122,21 @@ class clCharacter:
         chShowInfo(Param); Param = 0, 1, 2, 3
         chIncreaseCommonTrait(CommonTraitKey); Key is from chCommonTrait
         chIncreaseSpecialTrait(SpecialTraitKey); same
+        chRemoveWeapon(Weapon); chRemoveArmour(Armour)
+        chAddWeapon(NewWeapon); chAddArmour(NewArmour)
+        chHealthRestore(modifier); modifier = 0 => Restore value of BattleRestore
+             otherwise full restoration
+        chChangeGeneralParam(Key, Value); Key from chGeneralParam
+        chGetGeneralParam(Key) => return Value of GeneralParam[Key] or -1 in
+            case of error
+        chGetCommonTrait(Key); chGetSpecialTrait(Key) => same
+        chDoHit() => return Damage that Character delivers in that time
+        chDrinkPotion(Type) => type = 0 for Damage; = 1 for Healing
+        IT DOESN'T RETURN DAMAGE BACK AFTER HIT! Just drink and no more deals
+        chDisappearPotion() => set Damage back to normal
+        !!!How to use: Drink -> Hit -> Disappear!!!
+        One more IMPORTANT INFO: be sure that Character has potions, methods don't
+        check it. You can use chGetGeneralParam('PotionSlots')[i] i = 0 or 1
     """
     # define class fields
     __chGeneralParam = 0
@@ -319,14 +344,16 @@ class clCharacter:
         self.__chGeneralParam['MHealth'] += NewArmour['HealthBoost']
         self.__chGeneralParam['AttackSpeed'] += NewArmour['SpeedBoost']
 
-    def chHelthRestore(self, modifier=0):
+    def chHealthRestore(self, modifier=0):
         ''' Restore character health.
-            If modifier = 0, then restore value of HealthRestore
+            If modifier = 0, then restore value of BattleRestore
             else full restoration
         '''
         if not modifier:
-            self.__chGeneralParam['CHealth'] += int(self.__chGeneralParam['HealthRestore'] *
-                                                    100 / self.__chGeneralParam['MHealth'])
+            self.__chGeneralParam['CHealth'] += int(self.__chGeneralParam['BattleRestore'] *
+                                                    self.__chGeneralParam['MHealth'] / 100)
+            if self.__chGeneralParam['CHealth'] > self.__chGeneralParam['MHealth']:
+                self.__chGeneralParam['CHealth'] = self.__chGeneralParam['MHealth']
         else:
             self.__chGeneralParam['CHealth'] = self.__chGeneralParam['MHealth']
 
@@ -361,3 +388,35 @@ class clCharacter:
             return self.__chSpecialTrait[Key]
         else:
             return -1
+
+    def chDoHit(self):
+        ''' Let's smash our enemies!
+            return delivered Damage. It can be 0, if Character misses
+        '''
+        res = 0
+        # let's check, can we hit or not
+        if CountProbability(self.__chGeneralParam['HitChance']):
+            res = randint(self.__chGeneralParam['MinDamage'],
+                          self.__chGeneralParam['MaxDamage'])
+        return res
+
+    def chDrinkPotion(self, PotionType):
+        ''' It's time to drink potions!
+            PotionType = 0 for Healing and 1 for Damaging
+            We just drink potion and increase params of hero
+            !Don't forget to set Damage back after drinking!
+            !This method don't check count of Potions, so be sure that you have
+            more than 0 Potions!
+        '''
+        if PotionType:
+            self.__chGeneralParam['MinDamage'] += self.__chGeneralParam['PotionRestore']
+            self.__chGeneralParam['MaxDamage'] += self.__chGeneralParam['PotionRestore']
+            self.__chGeneralParam['PotionSlots'][1] -= 1
+        else:
+            self.__chGeneralParam['CHealth'] += self.__chGeneralParam['PotionRestore']
+            self.__chGeneralParam['PotionSlots'][0] -= 1
+    def chDisappearPotion(self):
+        ''' potion effect is disappeared. As you can guess, it works for Damage PotionRestore
+        '''
+        self.__chGeneralParam['MinDamage'] -= self.__chGeneralParam['PotionRestore']
+        self.__chGeneralParam['MaxDamage'] -= self.__chGeneralParam['PotionRestore']
