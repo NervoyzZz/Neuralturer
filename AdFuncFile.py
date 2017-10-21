@@ -50,17 +50,35 @@ class clArmour:
         for Key in self.__arGeneralParam.keys():
             print(Key + ':', self.__arGeneralParam[Key])
 
+def chHowMuchExpNeed(CurLvL):
+    ''' Show how much experience Character needs for new Level
+        Just interesting formula.
+        Exec it on the loop and see what it return. It's nice
+    '''
+    if CurLvL <= 1:
+        return 0
+    else:
+        if CurLvL//10 == 0:
+            k = 5
+        else:
+            k = CurLvL//10*10
+        return chHowMuchExpNeed(CurLvL-1) + k
+
+
+
 class clCharacter:
     """ Character class
         There are:
         General Params:
         str Name - name of Character
-        int Health, chMinDamage, chMaxDamage - health of Character and Damage
+        int CHealth, MHealth - Current and Max Health of Character
+        int MinDamage, MaxDamage - damage of Character
         int MaxPotion, PotionSlots[int HealthRestore, IncDamage] - max count that Character can carry
         and Count of each poison types
         int PotionRestore - how much potion can restore points
         int Gold - gold of Character
         int Level - Level of character
+        int Experience - experience of Character
         clWeapon Weapon - weapon that character uses
         clArmour Armour - armour that character wears
         int HitChance - chance to hit the enemy
@@ -103,7 +121,7 @@ class clCharacter:
     __chSpecialTrait = 0
     def __init__(self, Name = '', Health = 50, MinDamage = 1, MaxDamage = 3,
                  MaxPotion = 5, PotionSlots = [0, 0], PotionRestore = 1,
-                 Gold = 100, Level = 0, Weapon = clWeapon(), Armour = clArmour(),
+                 Gold = 100, Level = 0, Experience = 0, Weapon = clWeapon(), Armour = clArmour(),
                  HitChance = 50, AttackSpeed = 5, FindChance = 0, KnowChance = 0,
                  FleeChance = 0, BattleRestore = 20, Vitality = 0, Strength = 0,
                  Luck = 0, Agility = 0, Accuracy = 0, Attention = 0, Charisma = 0,
@@ -111,7 +129,9 @@ class clCharacter:
                  QuickHand = 0, OnePunch = 0, Physician = 0, Trader = 0):
         self.__chGeneralParam = dict()
         self.__chGeneralParam['Name'] = Name
-        self.__chGeneralParam['Health'] = Health
+        # when we create Character current and max health are equal
+        self.__chGeneralParam['CHealth'] = Health
+        self.__chGeneralParam['MHealth'] = Health
         self.__chGeneralParam['MinDamage'] = MinDamage
         self.__chGeneralParam['MaxDamage'] = MaxDamage
         self.__chGeneralParam['MaxPotion'] = MaxPotion
@@ -119,6 +139,7 @@ class clCharacter:
         self.__chGeneralParam['PotionRestore'] = PotionRestore
         self.__chGeneralParam['Gold'] = Gold
         self.__chGeneralParam['Level'] = Level
+        self.__chGeneralParam['Experience'] = Experience
         self.__chGeneralParam['HitChance'] = HitChance
         self.__chGeneralParam['AttackSpeed'] = AttackSpeed
         self.__chGeneralParam['FindChance'] = FindChance
@@ -147,7 +168,6 @@ class clCharacter:
         self.__chSpecialTrait['Physician'] = Physician
         self.__chSpecialTrait['Trader'] = Trader
 
-
     def chShowInfo(self, Param = 0):
         '''Param - how much info you need
            Param = 0 shows you only General params
@@ -158,12 +178,15 @@ class clCharacter:
         if Param == 0 or Param == 3:
             print("Name:", self.__chGeneralParam['Name'], " "*5,
                   "Level:", self.__chGeneralParam['Level'], " "*5,
+                  "Exp:", str(self.__chGeneralParam['Experience']) + '/' +
+                  str(chHowMuchExpNeed(self.__chGeneralParam['Level'])), " "*5,
                   "Gold:", self.__chGeneralParam['Gold'])
-            print("Weapon:", self.__chWeapon['Name'])
-            print("Armour:", self.__chArmour['Name'])
-            print("Health:", self.__chGeneralParam['Health'])
+            print("Health:", str(self.__chGeneralParam['CHealth']) + '/' + str(
+                  self.__chGeneralParam['MHealth']))
             print("Damage:", self.__chGeneralParam['MinDamage'],
                   "-", self.__chGeneralParam['MaxDamage'])
+            print("Weapon:", self.__chWeapon['Name'])
+            print("Armour:", self.__chArmour['Name'])
             print("Potions: Healing", str(self.__chGeneralParam['PotionSlots'][0])+
                   "/"+str(self.__chGeneralParam['MaxPotion'])+ "; Damage "+
                   str(self.__chGeneralParam['PotionSlots'][1])+"/"+
@@ -217,7 +240,7 @@ class clCharacter:
             self.__chCommonTrait[CommonTraitKey] += 1
             print(CommonTraitKey, 'has been increased!')
             if CommonTraitKey == 'Vitality':
-                self.__chGeneralParam['Health'] += 5
+                self.__chGeneralParam['MHealth'] += 5
             elif CommonTraitKey == 'Strength':
                 self.__chGeneralParam['MinDamage'] += 2
                 self.__chGeneralParam['MaxDamage'] += 2
@@ -243,7 +266,7 @@ class clCharacter:
             self.__chSpecialTrait[SpecialTraitKey] += 1
             print(SpecialTraitKey, 'has been improve!')
             if SpecialTraitKey == 'Undead':
-                self.__chGeneralParam['Health'] += 20
+                self.__chGeneralParam['MHealth'] += 20
             elif SpecialTraitKey == 'Carrier':
                 self.__chGeneralParam['MaxPotion'] += 2
             elif SpecialTraitKey == 'QuickHand':
@@ -282,7 +305,7 @@ class clCharacter:
         ''' This method removes OldArmour from Character
             change Character's params and set Armour to None
         '''
-        self.__chGeneralParam['Health'] -= OldArmour['HealthBoost']
+        self.__chGeneralParam['MHealth'] -= OldArmour['HealthBoost']
         self.__chGeneralParam['AttackSpeed'] -= OldArmour['SpeedBoost']
         self.__chArmour = clArmour()
 
@@ -293,5 +316,48 @@ class clCharacter:
         '''
         self.chRemoveArmour(self.__chArmour)
         self.__chArmour = NewArmour
-        self.__chGeneralParam['Health'] += NewArmour['HealthBoost']
+        self.__chGeneralParam['MHealth'] += NewArmour['HealthBoost']
         self.__chGeneralParam['AttackSpeed'] += NewArmour['SpeedBoost']
+
+    def chHelthRestore(self, modifier=0):
+        ''' Restore character health.
+            If modifier = 0, then restore value of HealthRestore
+            else full restoration
+        '''
+        if not modifier:
+            self.__chGeneralParam['CHealth'] += int(self.__chGeneralParam['HealthRestore'] *
+                                                    100 / self.__chGeneralParam['MHealth'])
+        else:
+            self.__chGeneralParam['CHealth'] = self.__chGeneralParam['MHealth']
+
+    def chChangeGeneralParam(self, Key, value = 1):
+        ''' Change chGeneralParam[Key] with value
+        '''
+        if Key in self.__chGeneralParam.keys():
+            self.__chGeneralParam[Key] += value
+        else:
+            print('Enable to change', Key)
+
+    def chGetGeneralParam(self, Key):
+        ''' return GeneralParam by Key
+        '''
+        if Key in self.__chGeneralParam.keys():
+            return self.__chGeneralParam[Key]
+        else:
+            return -1
+
+    def chGetCommonTrait(self, Key):
+        ''' return CommonTrait by Key
+        '''
+        if Key in self.__chCommonTrait.keys():
+            return self.__chCommonTrait[Key]
+        else:
+            return -1
+
+    def chGetSpecialTrait(self, Key):
+        ''' return SpecialTrait by Key
+        '''
+        if Key in self.__chSpecialTrait.keys():
+            return self.__chSpecialTrait[Key]
+        else:
+            return -1
