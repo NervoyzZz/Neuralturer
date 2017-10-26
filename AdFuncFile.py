@@ -7,6 +7,7 @@ class clWeapon:
     """ Weapon class
         There is wpGeneralParam with keys:
         str Name
+        str Description
         int MinDamage, MaxDamage
         int AttackSpeed
         methods:
@@ -14,9 +15,11 @@ class clWeapon:
     """
 
     __wpGeneralParam = 0
-    def __init__(self, Name = 'None', MinDamage = 0, MaxDamage = 0, AttackSpeed = 0):
+    def __init__(self, Name = 'None', Description = '', MinDamage = 0,
+                 MaxDamage = 0, AttackSpeed = 0):
         self.__wpGeneralParam = dict()
         self.__wpGeneralParam['Name'] = Name
+        self.__wpGeneralParam['Description'] = Description
         self.__wpGeneralParam['MinDamage'] = MinDamage
         self.__wpGeneralParam['MaxDamage'] = MaxDamage
         self.__wpGeneralParam['AttackSpeed'] = AttackSpeed
@@ -33,14 +36,17 @@ class clArmour:
     """ Armour class
         There is arGeneralParam with keys:
         str Name
+        str Descriotion
         int HealthBoost, SpeedBoost
         methods:
         arShowInfo()
     """
     __arGeneralParam = 0
-    def __init__(self, Name = 'None', HealthBoost = 0, SpeedBoost = 0):
+    def __init__(self, Name = 'None', Description = '',
+                 HealthBoost = 0, SpeedBoost = 0):
         self.__arGeneralParam = dict()
         self.__arGeneralParam['Name'] = Name
+        self.__arGeneralParam['Description'] = Description
         self.__arGeneralParam['HealthBoost'] = HealthBoost
         self.__arGeneralParam['SpeedBoost'] = SpeedBoost
     def __getitem__(self, key):
@@ -66,21 +72,48 @@ def chHowMuchExpNeed(CurLvL):
             k = CurLvL//10*10
         return chHowMuchExpNeed(CurLvL-1) + k
 
-def CountProbability(percent):
-    ''' Count probability of starting event
-        if event can start => return 1 else return 0
+def WhatWillHappen(DictOfEvents):
+    ''' Count probability of Events in Keys of DictOfEvents with
+        percents as Value
+        If nothing will happen => return 0
+        Samples (Just show that's it work and how, don't show
+        all functions calling):
+        >>> a = {'KeK':100}
+        >>> b = {'LoL': 100, 'SES':200}
+        >>> c = {'Yeah': 50, 'Wow':15}
+        >>> d = {'int': 15, 'float': 45, 'dict': 40}
+        >>> WhatWillHappen(a)
+            'KeK'
+        >>> WhatWillHappen(b)
+            'LoL'
+        >>> WhatWillHappen(c)
+            0
+        >>> WhatWillHappen(c)
+            'Yeah'
+        >>> WhatWillHappen(c)
+            'Wow'
+        >>> WhatWillHappen(d)
+            'float'
+        >>> WhatWillHappen(d)
+            'dict'
+        >>> WhatWillHappen(d)
+            'int'
     '''
     randomNumber = randint(1, 10000)
-    if randomNumber <= percent * 100:
-        return 1
-    else:
-        return 0
+    curPerc = 0
+    for key in DictOfEvents.keys():
+        if randomNumber <= (curPerc + DictOfEvents[key]) * 100:
+            return key
+        else:
+            curPerc += DictOfEvents[key]
+    return 0
 
 class clCharacter:
     """ Character class
         There are:
         chGeneralParams:
         str Name - name of Character
+        str Description - description of Character (Just for Enemy)
         int CHealth, MHealth - Current and Max Health of Character
         int MinDamage, MaxDamage - damage of Character
         int MaxPotion, PotionSlots[int HealthRestore, IncDamage] - max count that Character can carry
@@ -104,7 +137,7 @@ class clCharacter:
         int Strength - each point increase chDamage by 2
         int Accuracy - each point increase chHitChance by 5
         int Luck - who has more chLuck that smashes enemy the first
-        int Agility - each point increase chAttackSpeed by 5
+        int Agility - each point increase chAttackSpeed by 10
         int Attention - each point increase chFindChance by 10
         int Charisma - each point increase chKnowChance by 10
         int Intelligence - each point increase chPotionRestore by 1
@@ -113,13 +146,15 @@ class clCharacter:
         Every 10 levels player gets 1 point to spend it to chSpecialTrait:
         int Undead - every point increase chHealth by 20
         int Carrier - every point increase chMaxPotions by 2
-        int QuickHand - every point increase chSpeed by 20
+        int QuickHand - every point increase chSpeed by 50
         int OnePunch - every point increase chSpeed by 8
         int Physician - every point increase chBattleRestore by 16
         int Trader - character gets 1000 Golds
 
         Methods:
         chShowInfo(Param); Param = 0, 1, 2, 3
+            This method for Hero, so there isn't Description that will be used
+            only for Enemy. Info about Enemy we will get with chGetGeneralParam
         chIncreaseCommonTrait(CommonTraitKey); Key is from chCommonTrait
         chIncreaseSpecialTrait(SpecialTraitKey); same
         chRemoveWeapon(Weapon); chRemoveArmour(Armour)
@@ -144,16 +179,18 @@ class clCharacter:
     __chArmour = clArmour()
     __chCommonTrait = 0
     __chSpecialTrait = 0
-    def __init__(self, Name = '', Health = 50, MinDamage = 1, MaxDamage = 3,
-                 MaxPotion = 5, PotionSlots = [0, 0], PotionRestore = 1,
-                 Gold = 100, Level = 0, Experience = 0, Weapon = clWeapon(), Armour = clArmour(),
-                 HitChance = 50, AttackSpeed = 5, FindChance = 0, KnowChance = 0,
-                 FleeChance = 0, BattleRestore = 20, Vitality = 0, Strength = 0,
-                 Luck = 0, Agility = 0, Accuracy = 0, Attention = 0, Charisma = 0,
+    def __init__(self, Name = '', Description = '', Health = 50, MinDamage = 1,
+                 MaxDamage = 3, MaxPotion = 5, PotionSlots = [0, 0],
+                 PotionRestore = 1, Gold = 100, Level = 0, Experience = 0,
+                 Weapon = clWeapon(), Armour = clArmour(), HitChance = 50,
+                 AttackSpeed = 100, FindChance = 0, KnowChance = 0, FleeChance = 0,
+                 BattleRestore = 20, Vitality = 0, Strength = 0, Luck = 0,
+                 Agility = 0, Accuracy = 0, Attention = 0, Charisma = 0,
                  Intelligence = 0, Instinct = 0, Undead = 0, Carrier = 0,
                  QuickHand = 0, OnePunch = 0, Physician = 0, Trader = 0):
         self.__chGeneralParam = dict()
         self.__chGeneralParam['Name'] = Name
+        self.__chGeneralParam['Description'] = Description
         # when we create Character current and max health are equal
         self.__chGeneralParam['CHealth'] = Health
         self.__chGeneralParam['MHealth'] = Health
@@ -269,6 +306,8 @@ class clCharacter:
             elif CommonTraitKey == 'Strength':
                 self.__chGeneralParam['MinDamage'] += 2
                 self.__chGeneralParam['MaxDamage'] += 2
+            elif CommonTraitKey == 'Agility':
+                self.__chGeneralParam['AttackSpeed'] += 10
             elif CommonTraitKey == 'Accuracy':
                 self.__chGeneralParam['HitChance'] += 5
             elif CommonTraitKey == 'Attention':
@@ -295,7 +334,7 @@ class clCharacter:
             elif SpecialTraitKey == 'Carrier':
                 self.__chGeneralParam['MaxPotion'] += 2
             elif SpecialTraitKey == 'QuickHand':
-                self.__chGeneralParam['AttackSpeed'] += 20
+                self.__chGeneralParam['AttackSpeed'] += 50
             elif SpecialTraitKey == 'OnePunch':
                 self.__chGeneralParam['MinDamage'] += 8
                 self.__chGeneralParam['MaxDamage'] += 8
@@ -395,7 +434,8 @@ class clCharacter:
         '''
         res = 0
         # let's check, can we hit or not
-        if CountProbability(self.__chGeneralParam['HitChance']):
+           # return 1 if Character can hit
+        if WhatWillHappen({1: self.__chGeneralParam['HitChance']}):
             res = randint(self.__chGeneralParam['MinDamage'],
                           self.__chGeneralParam['MaxDamage'])
         return res
@@ -420,3 +460,84 @@ class clCharacter:
         '''
         self.__chGeneralParam['MinDamage'] -= self.__chGeneralParam['PotionRestore']
         self.__chGeneralParam['MaxDamage'] -= self.__chGeneralParam['PotionRestore']
+
+
+
+
+''' It's time to create some global constants
+    So, you should know that there're some types of Character possible trips
+    and some types of possible Enemy
+    so trip can be easy, normal (medium), hard and very hard,
+    and unique - forest trip
+    Enemies can be easy, normal(medium), hard, unique (that will create by hand),
+    and animals
+    idea is: we have Random Function and we have set of possible Enemies
+    so, let's create random Enemy. Of course, Enemy not random at all, there're
+    some setups for them (classes like archer, warrior, thief, etc.)
+    In area these classes will use clearly. Field Enemies I create as I see them
+'''
+# Random functions for trips
+constEasyTrip = {'EasyEnemy': 80, 'AnimalEnemy': 15, 'MediumEnemy': 5 }
+constMediumTrip = {'EasyEnemy': 15, 'AnimalEnemy': 10, 'MediumEnemy': 70,
+                   'HardEnemy': 5}
+constHardTrip = {'EasyEnemy': 5, 'AnimalEnemy': 5, 'MediumEnemy': 35,
+                 'HardEnemy': 55}
+constVeryHardTrip = {'MediumEnemy': 15, 'HardEnemy': 80, 'UniqueEnemy': 5}
+constForestTrip = {'EasyEnemy': 10, 'AnimalEnemy': 90}
+# Weapons and Armours
+constNoneWeapon = (clWeapon(), )
+constNoneArmour = (clArmour(), )
+# Enemies. They have name, Description, Health, Damage[], Levels[], Gold[],
+#  Weapon[], Armour[], CommonTrait like {Key: percent} for random generation
+constAnimalEnemy = ({'Name': 'Young wolf', 'Description': """You see just common
+                     young wolf, that looks hungry and ungry""", 'Health': 30,
+                     'Damage': (2, 7), 'Levels': (1, 5), 'Gold': (0,0),
+                     'Weapon': constNoneWeapon, 'Armour': constNoneArmour,
+                     'CommonTrait': {'Agility': 100}},
+
+                     {'Name': 'Wolf', 'Description': """You see just common wolf,
+                      that looks hungry and ungry""", 'Health': 35,
+                      'Damage': (2, 7), 'Levels': (3, 7), 'Gold': (0,0),
+                      'Weapon': constNoneWeapon, 'Armour': constNoneArmour,
+                      'CommonTrait': {'Agility': 100}},
+
+                     {'Name': 'Furious wolf', 'Description': """You see strong
+                      wolf in fury""", 'Health': 40, 'Damage': (4, 9),
+                      'Levels': (6, 10), 'Gold': (0,0),
+                      'Weapon': constNoneWeapon, 'Armour': constNoneArmour,
+                      'CommonTrait': {'Agility': 60, 'Strength': 40}},
+
+                     {'Name': 'Young boar', 'Description': """You see just
+                      common young boar, that looks hungry""", 'Health': 25,
+                      'Damage': (2, 5), 'Levels': (1, 5), 'Gold': (0,0),
+                      'Weapon': constNoneWeapon, 'Armour': constNoneArmour,
+                      'CommonTrait': {'Vitality': 100}},
+
+                     {'Name': 'Boar', 'Description': """You see just common boar,
+                      that looks hungry""", 'Health': 35, 'Damage': (3, 6),
+                      'Levels': (3, 7), 'Gold': (0,0), 'Weapon': constNoneWeapon,
+                      'Armour': constNoneArmour, 'CommonTrait': {'Vitality': 100}},
+
+                     {'Name': 'Huge boar', 'Description': """You see enormous
+                      boar, that looks hungry""", 'Health': 50, 'Damage': (5, 9),
+                      'Levels': (6, 10), 'Gold': (0,0),
+                      'Weapon': constNoneWeapon,'Armour': constNoneArmour,
+                      'CommonTrait': {'Vitality': 50, 'Agility': 50}},
+
+                     {'Name': 'Young bear', 'Description': """You see just
+                      common young bear, that looks hungry and ungry""",
+                      'Health': 35, 'Damage': (3, 9), 'Levels': (1, 5),
+                      'Gold': (0,0), 'Weapon': constNoneWeapon,
+                      'Armour': constNoneArmour, 'CommonTrait': {'Strength': 100}},
+
+                     {'Name': 'Bear', 'Description': """You see just common bear,
+                      that looks hungry and ungry""", 'Health': 45,
+                      'Damage': (4, 10), 'Levels': (3, 7), 'Gold': (0,0),
+                      'Weapon': constNoneWeapon, 'Armour': constNoneArmour,
+                      'CommonTrait': {'Strength': 100}},
+
+                     {'Name': 'Bear in range', 'Description':"""You see old bear
+                      in range, that looks very dangerous""", 'Health': 55,
+                      'Damage': (5, 12), 'Levels': (6, 10), 'Gold': (0,0),
+                      'Weapon': constNoneWeapon, 'Armour': constNoneArmour,
+                      'CommonTrait': {'Strength': 40, 'Agility': 60}})
