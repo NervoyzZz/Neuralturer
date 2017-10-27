@@ -2,6 +2,7 @@
 # File with useful functional
 
 from random import randint
+from AdConstFile import *
 
 class clWeapon:
     """ Weapon class
@@ -15,11 +16,12 @@ class clWeapon:
     """
 
     __wpGeneralParam = 0
-    def __init__(self, Name = 'None', Description = '', MinDamage = 0,
+    def __init__(self, Name = 'None', Description = '', Price = 0, MinDamage = 0,
                  MaxDamage = 0, AttackSpeed = 0):
         self.__wpGeneralParam = dict()
         self.__wpGeneralParam['Name'] = Name
         self.__wpGeneralParam['Description'] = Description
+        self.__wpGeneralParam['Price'] = Price
         self.__wpGeneralParam['MinDamage'] = MinDamage
         self.__wpGeneralParam['MaxDamage'] = MaxDamage
         self.__wpGeneralParam['AttackSpeed'] = AttackSpeed
@@ -42,11 +44,12 @@ class clArmour:
         arShowInfo()
     """
     __arGeneralParam = 0
-    def __init__(self, Name = 'None', Description = '',
+    def __init__(self, Name = 'None', Description = '', Price = 0,
                  HealthBoost = 0, SpeedBoost = 0):
         self.__arGeneralParam = dict()
         self.__arGeneralParam['Name'] = Name
         self.__arGeneralParam['Description'] = Description
+        self.__arGeneralParam['Price'] = Price
         self.__arGeneralParam['HealthBoost'] = HealthBoost
         self.__arGeneralParam['SpeedBoost'] = SpeedBoost
     def __getitem__(self, key):
@@ -460,84 +463,3 @@ class clCharacter:
         '''
         self.__chGeneralParam['MinDamage'] -= self.__chGeneralParam['PotionRestore']
         self.__chGeneralParam['MaxDamage'] -= self.__chGeneralParam['PotionRestore']
-
-
-
-
-''' It's time to create some global constants
-    So, you should know that there're some types of Character possible trips
-    and some types of possible Enemy
-    so trip can be easy, normal (medium), hard and very hard,
-    and unique - forest trip
-    Enemies can be easy, normal(medium), hard, unique (that will create by hand),
-    and animals
-    idea is: we have Random Function and we have set of possible Enemies
-    so, let's create random Enemy. Of course, Enemy not random at all, there're
-    some setups for them (classes like archer, warrior, thief, etc.)
-    In area these classes will use clearly. Field Enemies I create as I see them
-'''
-# Random functions for trips
-constEasyTrip = {'EasyEnemy': 80, 'AnimalEnemy': 15, 'MediumEnemy': 5 }
-constMediumTrip = {'EasyEnemy': 15, 'AnimalEnemy': 10, 'MediumEnemy': 70,
-                   'HardEnemy': 5}
-constHardTrip = {'EasyEnemy': 5, 'AnimalEnemy': 5, 'MediumEnemy': 35,
-                 'HardEnemy': 55}
-constVeryHardTrip = {'MediumEnemy': 15, 'HardEnemy': 80, 'UniqueEnemy': 5}
-constForestTrip = {'EasyEnemy': 10, 'AnimalEnemy': 90}
-# Weapons and Armours
-constNoneWeapon = (clWeapon(), )
-constNoneArmour = (clArmour(), )
-# Enemies. They have name, Description, Health, Damage[], Levels[], Gold[],
-#  Weapon[], Armour[], CommonTrait like {Key: percent} for random generation
-constAnimalEnemy = ({'Name': 'Young wolf', 'Description': """You see just common
-                     young wolf, that looks hungry and ungry""", 'Health': 30,
-                     'Damage': (2, 7), 'Levels': (1, 5), 'Gold': (0,0),
-                     'Weapon': constNoneWeapon, 'Armour': constNoneArmour,
-                     'CommonTrait': {'Agility': 100}},
-
-                     {'Name': 'Wolf', 'Description': """You see just common wolf,
-                      that looks hungry and ungry""", 'Health': 35,
-                      'Damage': (2, 7), 'Levels': (3, 7), 'Gold': (0,0),
-                      'Weapon': constNoneWeapon, 'Armour': constNoneArmour,
-                      'CommonTrait': {'Agility': 100}},
-
-                     {'Name': 'Furious wolf', 'Description': """You see strong
-                      wolf in fury""", 'Health': 40, 'Damage': (4, 9),
-                      'Levels': (6, 10), 'Gold': (0,0),
-                      'Weapon': constNoneWeapon, 'Armour': constNoneArmour,
-                      'CommonTrait': {'Agility': 60, 'Strength': 40}},
-
-                     {'Name': 'Young boar', 'Description': """You see just
-                      common young boar, that looks hungry""", 'Health': 25,
-                      'Damage': (2, 5), 'Levels': (1, 5), 'Gold': (0,0),
-                      'Weapon': constNoneWeapon, 'Armour': constNoneArmour,
-                      'CommonTrait': {'Vitality': 100}},
-
-                     {'Name': 'Boar', 'Description': """You see just common boar,
-                      that looks hungry""", 'Health': 35, 'Damage': (3, 6),
-                      'Levels': (3, 7), 'Gold': (0,0), 'Weapon': constNoneWeapon,
-                      'Armour': constNoneArmour, 'CommonTrait': {'Vitality': 100}},
-
-                     {'Name': 'Huge boar', 'Description': """You see enormous
-                      boar, that looks hungry""", 'Health': 50, 'Damage': (5, 9),
-                      'Levels': (6, 10), 'Gold': (0,0),
-                      'Weapon': constNoneWeapon,'Armour': constNoneArmour,
-                      'CommonTrait': {'Vitality': 50, 'Agility': 50}},
-
-                     {'Name': 'Young bear', 'Description': """You see just
-                      common young bear, that looks hungry and ungry""",
-                      'Health': 35, 'Damage': (3, 9), 'Levels': (1, 5),
-                      'Gold': (0,0), 'Weapon': constNoneWeapon,
-                      'Armour': constNoneArmour, 'CommonTrait': {'Strength': 100}},
-
-                     {'Name': 'Bear', 'Description': """You see just common bear,
-                      that looks hungry and ungry""", 'Health': 45,
-                      'Damage': (4, 10), 'Levels': (3, 7), 'Gold': (0,0),
-                      'Weapon': constNoneWeapon, 'Armour': constNoneArmour,
-                      'CommonTrait': {'Strength': 100}},
-
-                     {'Name': 'Bear in range', 'Description':"""You see old bear
-                      in range, that looks very dangerous""", 'Health': 55,
-                      'Damage': (5, 12), 'Levels': (6, 10), 'Gold': (0,0),
-                      'Weapon': constNoneWeapon, 'Armour': constNoneArmour,
-                      'CommonTrait': {'Strength': 40, 'Agility': 60}})
