@@ -1,7 +1,7 @@
 # Neuralturer game
 # File with useful functional
 
-from random import randint
+from random import randint, choice
 from AdConstFile import *
 
 class clWeapon:
@@ -165,6 +165,7 @@ class clCharacter:
         chHealthRestore(modifier); modifier = 0 => Restore value of BattleRestore
              otherwise full restoration
         chChangeGeneralParam(Key, Value); Key from chGeneralParam
+        chSetGeneralParam(Key, value);
         chGetGeneralParam(Key) => return Value of GeneralParam[Key] or -1 in
             case of error
         chGetCommonTrait(Key); chGetSpecialTrait(Key) => same
@@ -407,6 +408,14 @@ class clCharacter:
         else:
             print('Enable to change', Key)
 
+    def chSetGeneralParam(self, Key, value = 0):
+        ''' Set chGeneralParam[Key] to value '''
+        if Key in self.__chGeneralParam.keys():
+            self.__chGeneralParam[Key] = value
+        else:
+            print('Enable to set', Key)
+
+
     def chGetGeneralParam(self, Key):
         ''' return GeneralParam by Key
         '''
@@ -463,3 +472,92 @@ class clCharacter:
         '''
         self.__chGeneralParam['MinDamage'] -= self.__chGeneralParam['PotionRestore']
         self.__chGeneralParam['MaxDamage'] -= self.__chGeneralParam['PotionRestore']
+
+
+def EnemyGenerationByTrip(TripType):
+    ''' Function that return Enemy. Enemy is choosen by TripType (look at
+        AdConstFile). It can be constEasyTrip, constMediumTrip, constHardTrip,
+        constVeryHardTrip and constForestTrip. First, choose EnemyType,
+        then create Enemy and return it.
+    '''
+    # let Python to know about our constants from File
+    global constNoneWeapon
+    global constNoneArmour
+    global constDaggerWeapon
+    global constSwordWeapon
+    global constAxeWeapon
+    global constSpearWeapon
+    global constGreatSwordWeapon
+    global constHammerWeapon
+    global constBowWeapon
+    global constAnyWeapon
+    global constClothesArmour
+    global constLightArmour
+    global constHeavyArmour
+    global constAnyArmour
+    global constAnimalEnemy
+    global constEasyEnemy
+    global constMediumEnemy
+    # So let's choose EnemyType:
+    EnemyType = WhatWillHappen(TripType)
+    resEnemy = -1
+    EnemyInfo = -1
+    if EnemyType == 'EasyEnemy':
+        EnemyInfo = choice(constEasyEnemy)
+    elif EnemyType == 'MediumEnemy':
+        EnemyInfo = choice(constMediumEnemy)
+    elif EnemyType == 'AnimalEnemy':
+        EnemyInfo = choice(constAnimalEnemy)
+    else:
+        print("Error! Enable to choice Enemy.")
+        return resEnemy
+    resEnemy = clCharacter(EnemyInfo['Name'], EnemyInfo['Description'],
+                           EnemyInfo['Health'], EnemyInfo['Damage'][0],
+                           EnemyInfo['Damage'][1])
+    lvl = randint(EnemyInfo['Levels'][0], EnemyInfo['Levels'][1])
+    resEnemy.chSetGeneralParam('Level', lvl)
+    gld = randint(EnemyInfo['Gold'][0], EnemyInfo['Gold'][1])
+    resEnemy.chSetGeneralParam('Gold', gld)
+    weapInfo = choice(choice(EnemyInfo['Weapon']))
+    EnWeap = clWeapon(weapInfo['Name'], weapInfo['Description'],
+                      weapInfo['Price'], weapInfo['Damage'][0],
+                      weapInfo['Damage'][1], weapInfo['AttackSpeed'])
+    resEnemy.chAddWeapon(EnWeap)
+    armInfo = choice(choice(EnemyInfo['Armour']))
+    EnArm = clArmour(armInfo['Name'], armInfo['Description'], armInfo['Price'],
+                     armInfo['HealthBoost'], armInfo['SpeedBoost'])
+    resEnemy.chAddArmour(EnArm)
+    # let's train our Enemy
+    traitPoint = lvl + 2
+    spTraitPoint = lvl // 10
+    traits = ['Vitality', 'Strength', 'Accuracy', 'Luck', 'Agility', 'Intelligence',
+              'Instinct']
+    traitsProb = {}
+    for keys in EnemyInfo['CommonTrait'].keys():
+        traitsProb[keys] = EnemyInfo['CommonTrait'][keys]
+    spTraits = ('Udead', 'Carrier', 'QuickHand', 'OnePunch', 'Physician', 'Trader')
+    while traitPoint > 0:
+        impTr = WhatWillHappen(traitsProb)
+        if impTr in traits:
+            resEnemy.chIncreaseCommonTrait(impTr)
+            traitPoint -= 1
+            if resEnemy.chGetCommonTrait(impTr) == 10:
+                traits.remove(impTr)
+                probofTrait = traitsProb[impTr]
+                for k in range(1, probofTrait + 1):
+                    traitsProb[impTr] -= 1
+                    traitsProb[choice(traits)] += 1
+    while spTraitPoint > 0:
+        resEnemy.chIncreaseSpecialTrait(choice(spTraits))
+        spTraitPoint -= 1
+    # and give to Enemy some Potions
+    if EnemyInfo in constAnimalEnemy:
+        hlPtn = 0
+        dmgPtn = 0
+    else:
+        hlPtn = randint(0, resEnemy.chGetGeneralParam('MaxPotion') + 1)
+        dmgPtn = randint(0, resEnemy.chGetGeneralParam('MaxPotion') + 1)
+    resEnemy.chSetGeneralParam('PotionSlots', [hlPtn, dmgPtn])
+    # and we should set health of enemy to MAX
+    resEnemy.chSetGeneralParam('CHealth', resEnemy.chGetGeneralParam('MHealth'))
+    return resEnemy

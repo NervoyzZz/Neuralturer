@@ -29,9 +29,9 @@ constNoneArmour = ({'Name': 'None', 'Description': '', 'Price': 0,
 # It's better to generate weapon object when we generate Enemy, so there will be
 # tuple of dictionaries. Also, Weapons and Armour will be tradable, so it's time
 # to add Price to them
-constDaggerWeapon = ({'Name': 'Rusty dagger', 'Description': """It's an old rusty
-                      dagger, that has lived his best times.""", 'Price': 100,
-                      'Damage': (1, 5), 'AttackSpeed': 30},
+constDaggerWeapon = ({'Name': 'Rusty dagger', 'Description': """It's an
+                      old rusty dagger, that has lived his best times.""",
+                      'Price': 100, 'Damage': (1, 5), 'AttackSpeed': 30},
 
                      {'Name': 'Blunt dagger', 'Description': """It's a good dagger,
                       but it's blunt.""", 'Price': 300, 'Damage': (2, 6),
