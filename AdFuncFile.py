@@ -29,10 +29,13 @@ class clWeapon:
         return self.__wpGeneralParam[key]
 
     def wpShowInfo(self):
-        ''' Just show info about Weapon
-        '''
-        for Key in self.__wpGeneralParam.keys():
-            print(Key + ':', self.__wpGeneralParam[Key])
+        ''' Just show info about Weapon '''
+        print(self.__wpGeneralParam['Name'])
+        print(self.__wpGeneralParam['Description'])
+        print('Damage:', str(self.__wpGeneralParam['MinDamage']) + '-' +
+              str(self.__wpGeneralParam['MaxDamage']))
+        print('Attack speed:', self.__wpGeneralParam['AttackSpeed'])
+        print('Price:', self.__wpGeneralParam['Price'])
 
 class clArmour:
     """ Armour class
@@ -56,10 +59,12 @@ class clArmour:
         return self.__arGeneralParam[key]
 
     def arShowInfo(self):
-        ''' Just show info about Weapon
-        '''
-        for Key in self.__arGeneralParam.keys():
-            print(Key + ':', self.__arGeneralParam[Key])
+        ''' Just show info about Weapon '''
+        print(self.__arGeneralParam['Name'])
+        print(self.__arGeneralParam['Description'])
+        print('Health modifier:', self.__arGeneralParam['HealthBoost'])
+        print('Speed modifier:', self.__arGeneralParam['SpeedBoost'])
+        print('Price:', self.__arGeneralParam['Price'])
 
 def chHowMuchExpNeed(CurLvL):
     ''' Show how much experience Character needs for new Level
@@ -179,8 +184,6 @@ class clCharacter:
     """
     # define class fields
     __chGeneralParam = 0
-    __chWeapon = clWeapon()
-    __chArmour = clArmour()
     __chCommonTrait = 0
     __chSpecialTrait = 0
     def __init__(self, Name = '', Description = '', Health = 50, MinDamage = 1,
@@ -235,11 +238,11 @@ class clCharacter:
         self.__chSpecialTrait['Trader'] = Trader
 
     def chShowInfo(self, Param = 0):
-        '''Param - how much info you need
-           Param = 0 shows you only General params
-           Param = 1 shows you only Character Traits
-           Param = 2 show you only Character Special Traits
-           Param = 3 show you every param
+        ''' Param - how much info you need
+            Param = 0 shows you only General params
+            Param = 1 shows you only Character Traits
+            Param = 2 show you only Character Special Traits
+            Param = 3 show you every param
         '''
         if Param == 0 or Param == 3:
             print("Name:", self.__chGeneralParam['Name'], " "*5,
@@ -304,7 +307,6 @@ class clCharacter:
         # just a lot of 'if'
         if CommonTraitKey in self.__chCommonTrait.keys():
             self.__chCommonTrait[CommonTraitKey] += 1
-            print(CommonTraitKey, 'has been increased!')
             if CommonTraitKey == 'Vitality':
                 self.__chGeneralParam['MHealth'] += 5
             elif CommonTraitKey == 'Strength':
@@ -327,12 +329,11 @@ class clCharacter:
 
     def chIncreaseSpecialTrait(self, SpecialTraitKey):
         ''' Method increase choosen chSpecialTrait
-            by SpecialTrait
+            by SpecialTraitKey
         '''
         # if if if if if if ... if
         if SpecialTraitKey in self.__chSpecialTrait.keys():
             self.__chSpecialTrait[SpecialTraitKey] += 1
-            print(SpecialTraitKey, 'has been improve!')
             if SpecialTraitKey == 'Undead':
                 self.__chGeneralParam['MHealth'] += 20
             elif SpecialTraitKey == 'Carrier':
@@ -387,7 +388,7 @@ class clCharacter:
         self.__chGeneralParam['MHealth'] += NewArmour['HealthBoost']
         self.__chGeneralParam['AttackSpeed'] += NewArmour['SpeedBoost']
 
-    def chHealthRestore(self, modifier=0):
+    def chHealthRestore(self, modifier = 0):
         ''' Restore character health.
             If modifier = 0, then restore value of BattleRestore
             else full restoration
@@ -401,8 +402,7 @@ class clCharacter:
             self.__chGeneralParam['CHealth'] = self.__chGeneralParam['MHealth']
 
     def chChangeGeneralParam(self, Key, value = 1):
-        ''' Change chGeneralParam[Key] with value
-        '''
+        ''' Change chGeneralParam[Key] with value '''
         if Key in self.__chGeneralParam.keys():
             self.__chGeneralParam[Key] += value
         else:
@@ -417,24 +417,21 @@ class clCharacter:
 
 
     def chGetGeneralParam(self, Key):
-        ''' return GeneralParam by Key
-        '''
+        ''' return GeneralParam by Key '''
         if Key in self.__chGeneralParam.keys():
             return self.__chGeneralParam[Key]
         else:
             return -1
 
     def chGetCommonTrait(self, Key):
-        ''' return CommonTrait by Key
-        '''
+        ''' return CommonTrait by Key '''
         if Key in self.__chCommonTrait.keys():
             return self.__chCommonTrait[Key]
         else:
             return -1
 
     def chGetSpecialTrait(self, Key):
-        ''' return SpecialTrait by Key
-        '''
+        ''' return SpecialTrait by Key '''
         if Key in self.__chSpecialTrait.keys():
             return self.__chSpecialTrait[Key]
         else:
@@ -442,7 +439,7 @@ class clCharacter:
 
     def chDoHit(self):
         ''' Let's smash our enemies!
-            return delivered Damage. It can be 0, if Character misses
+            return delivered Damage. It can be 0, if Character missed
         '''
         res = 0
         # let's check, can we hit or not
@@ -468,7 +465,8 @@ class clCharacter:
             self.__chGeneralParam['CHealth'] += self.__chGeneralParam['PotionRestore']
             self.__chGeneralParam['PotionSlots'][0] -= 1
     def chDisappearPotion(self):
-        ''' potion effect is disappeared. As you can guess, it works for Damage PotionRestore
+        ''' potion effect is disappeared. As you can guess, it works for
+            Damage PotionRestore
         '''
         self.__chGeneralParam['MinDamage'] -= self.__chGeneralParam['PotionRestore']
         self.__chGeneralParam['MaxDamage'] -= self.__chGeneralParam['PotionRestore']
@@ -480,24 +478,6 @@ def EnemyGenerationByTrip(TripType):
         constVeryHardTrip and constForestTrip. First, choose EnemyType,
         then create Enemy and return it.
     '''
-    # let Python to know about our constants from File
-    global constNoneWeapon
-    global constNoneArmour
-    global constDaggerWeapon
-    global constSwordWeapon
-    global constAxeWeapon
-    global constSpearWeapon
-    global constGreatSwordWeapon
-    global constHammerWeapon
-    global constBowWeapon
-    global constAnyWeapon
-    global constClothesArmour
-    global constLightArmour
-    global constHeavyArmour
-    global constAnyArmour
-    global constAnimalEnemy
-    global constEasyEnemy
-    global constMediumEnemy
     # So let's choose EnemyType:
     EnemyType = WhatWillHappen(TripType)
     resEnemy = -1
@@ -511,6 +491,7 @@ def EnemyGenerationByTrip(TripType):
     else:
         print("Error! Enable to choice Enemy.")
         return resEnemy
+    # fill enemy params
     resEnemy = clCharacter(EnemyInfo['Name'], EnemyInfo['Description'],
                            EnemyInfo['Health'], EnemyInfo['Damage'][0],
                            EnemyInfo['Damage'][1])
@@ -535,7 +516,7 @@ def EnemyGenerationByTrip(TripType):
     traitsProb = {}
     for keys in EnemyInfo['CommonTrait'].keys():
         traitsProb[keys] = EnemyInfo['CommonTrait'][keys]
-    spTraits = ('Udead', 'Carrier', 'QuickHand', 'OnePunch', 'Physician', 'Trader')
+    spTraits = ('Undead', 'Carrier', 'QuickHand', 'OnePunch', 'Trader')
     while traitPoint > 0:
         impTr = WhatWillHappen(traitsProb)
         if impTr in traits:
@@ -543,6 +524,7 @@ def EnemyGenerationByTrip(TripType):
             traitPoint -= 1
             if resEnemy.chGetCommonTrait(impTr) == 10:
                 traits.remove(impTr)
+                # it's max size of common trait, so let's recount probability
                 probofTrait = traitsProb[impTr]
                 for k in range(1, probofTrait + 1):
                     traitsProb[impTr] -= 1
@@ -552,6 +534,7 @@ def EnemyGenerationByTrip(TripType):
         spTraitPoint -= 1
     # and give to Enemy some Potions
     if EnemyInfo in constAnimalEnemy:
+        # animal can't use potions
         hlPtn = 0
         dmgPtn = 0
     else:
