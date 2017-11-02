@@ -375,3 +375,24 @@ constMediumEnemy = ({'Name': 'Thug', 'Description': """You see a thug. He is goi
                       'Weapon': (constNoneWeapon, ), 'Armour': (constNoneArmour, ),
                       'CommonTrait': {'Vitality': 0, 'Strength': 0, 'Accuracy': 60, 'Luck': 15,
                       'Agility': 25, 'Intelligence': 0, 'Instinct': 0}})
+
+constArenaDueler = ({'Name': 'Dueler', 'Description': "", 'Health': 50,
+                     'Damage': (1, 3), 'Gold': (0, 0),
+                     'Weapon': (constDaggerWeapon, constBowWeapon),
+                     'Armour': (constClothesArmour, constLightArmour ),
+                     'CommonTrait': {'Vitality': 0, 'Strength': 0, 'Accuracy': 50,
+                     'Agility': 50, 'Intelligence': 0}},
+
+                    {'Name': 'Dueler', 'Description': "", 'Health': 50,
+                     'Damage': (1, 3), 'Gold': (0, 0),
+                     'Weapon': (constSwordWeapon, constAxeWeapon, constSpearWeapon),
+                     'Armour': constAnyArmour,
+                     'CommonTrait': {'Vitality': 50, 'Strength': 50, 'Accuracy': 0,
+                     'Agility': 0, 'Intelligence': 0}},
+
+                    {'Name': 'Dueler', 'Description': "", 'Health': 50,
+                     'Damage': (1, 3), 'Gold': (0, 0),
+                     'Weapon': (constGreatSwordWeapon, constHammerWeapon),
+                     'Armour': constAnyArmour,
+                     'CommonTrait': {'Vitality': 0, 'Strength': 50, 'Accuracy': 0,
+                     'Agility': 50, 'Intelligence': 0}})

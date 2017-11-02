@@ -472,25 +472,44 @@ class clCharacter:
         self.__chGeneralParam['MaxDamage'] -= self.__chGeneralParam['PotionRestore']
 
 
-def EnemyGenerationByTrip(TripType):
+def EnemyGenerationByTrip(TripType, HeroLvl = 25):
     ''' Function that return Enemy. Enemy is choosen by TripType (look at
         AdConstFile). It can be constEasyTrip, constMediumTrip, constHardTrip,
-        constVeryHardTrip and constForestTrip. First, choose EnemyType,
+        constVeryHardTrip and constForestTrip. It also can be equal ArenaE,
+        ArenaM, ArenaH for difficult of Arena. First, choose EnemyType,
         then create Enemy and return it.
     '''
     # So let's choose EnemyType:
-    EnemyType = WhatWillHappen(TripType)
     resEnemy = -1
     EnemyInfo = -1
-    if EnemyType == 'EasyEnemy':
-        EnemyInfo = choice(constEasyEnemy)
-    elif EnemyType == 'MediumEnemy':
-        EnemyInfo = choice(constMediumEnemy)
-    elif EnemyType == 'AnimalEnemy':
-        EnemyInfo = choice(constAnimalEnemy)
+    if TripType not in ('ArenaE', 'ArenaM', 'ArenaH'):
+        EnemyType = WhatWillHappen(TripType)
+        if EnemyType == 'EasyEnemy':
+            EnemyInfo = choice(constEasyEnemy)
+        elif EnemyType == 'MediumEnemy':
+            EnemyInfo = choice(constMediumEnemy)
+        elif EnemyType == 'AnimalEnemy':
+            EnemyInfo = choice(constAnimalEnemy)
+        else:
+            print("Error! Enable to choice Enemy.")
+            return resEnemy
     else:
-        print("Error! Enable to choice Enemy.")
-        return resEnemy
+        EnemyType = constArenaDueler
+        EnemyInfo = choice(EnemyType)
+        mLvl = 0
+        xLvl = 0
+        # auto leveling
+        if TripType == 'ArenaE':
+            mLvl = (1 if HeroLvl - 5 <= 1 else HeroLvl - 5)
+            xLvl = HeroLvl
+        elif TripType == 'ArenaM':
+            mLvl = HeroLvl
+            xLvl = (50 if HeroLvl + 5 >= 50 else HeroLvl + 5)
+        elif TripType == 'ArenaH':
+            mLvl = (50 if HeroLvl + 5 >= 50 else HeroLvl + 5)
+            xLvl = 50
+        DueLvl = (mLvl, xLvl)
+        EnemyInfo['Levels'] = DueLvl
     # fill enemy params
     resEnemy = clCharacter(EnemyInfo['Name'], EnemyInfo['Description'],
                            EnemyInfo['Health'], EnemyInfo['Damage'][0],
@@ -513,10 +532,21 @@ def EnemyGenerationByTrip(TripType):
     spTraitPoint = lvl // 10
     traits = ['Vitality', 'Strength', 'Accuracy', 'Luck', 'Agility', 'Intelligence',
               'Instinct']
+    spTraits = ['Undead', 'Carrier', 'QuickHand', 'OnePunch', 'Trader']
+    # remove useless traits for arena
+    if TripType in ('ArenaE', 'ArenaM', 'ArenaH'):
+        traits.remove('Luck')
+        traits.remove('Instinct')
+        print(traits)
+        spTraits.remove('Trader')
     traitsProb = {}
     for keys in EnemyInfo['CommonTrait'].keys():
         traitsProb[keys] = EnemyInfo['CommonTrait'][keys]
-    spTraits = ('Undead', 'Carrier', 'QuickHand', 'OnePunch', 'Trader')
+    # so now we have more points than we can spend, so choose useless traits
+    if TripType in ('ArenaE', 'ArenaM', 'ArenaH') and traitPoint > 50:
+        for i in range(0, traitPoint - 50):
+            resEnemy.chIncreaseCommonTrait(choice(('Luck', 'Instinct')))
+            traitPoint -= 1
     while traitPoint > 0:
         impTr = WhatWillHappen(traitsProb)
         if impTr in traits:
@@ -524,11 +554,16 @@ def EnemyGenerationByTrip(TripType):
             traitPoint -= 1
             if resEnemy.chGetCommonTrait(impTr) == 10:
                 traits.remove(impTr)
+                print(traits)
+                print(traitPoint)
                 # it's max size of common trait, so let's recount probability
-                probofTrait = traitsProb[impTr]
-                for k in range(1, probofTrait + 1):
-                    traitsProb[impTr] -= 1
-                    traitsProb[choice(traits)] += 1
+                # when we spend all our points for arena we will try to recount
+                # probability, that is an error. So:
+                if traitPoint != 0:
+                    probofTrait = traitsProb[impTr]
+                    for k in range(1, probofTrait + 1):
+                        traitsProb[impTr] -= 1
+                        traitsProb[choice(traits)] += 1
     while spTraitPoint > 0:
         resEnemy.chIncreaseSpecialTrait(choice(spTraits))
         spTraitPoint -= 1
