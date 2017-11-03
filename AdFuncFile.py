@@ -589,12 +589,12 @@ def EnemyGenerationByTrip(TripType, HeroLvl = 25):
 def HeroNewLevel(Hero):
     ''' Function that makes all durty work to increase Hero lvl '''
     # first we need to change current Hero Experience
-    exp = (chHowMuchExpNeed(Hero.chGetGeneralParam('Level')) -
-          Hero.chGetGeneralParam('Experience'))
+    exp = (Hero.chGetGeneralParam('Experience') -
+           chHowMuchExpNeed(Hero.chGetGeneralParam('Level') + 1))
     Hero.chChangeGeneralParam('Level', 1)
     Hero.chSetGeneralParam('Experience', exp)
     # on 1st lvl Hero gets 3 points
-    points = (3 if Hero.chGetGeneralParam('Level') else 1)
+    points = (3 if Hero.chGetGeneralParam('Level') == 1 else 1)
     # every 10 lvl Hero gets 1 point to increase Special Trait
     spoints = (1 if Hero.chGetGeneralParam('Level') // 10 > 0 and
                Hero.chGetGeneralParam('Level') % 10 == 0 else 0)
@@ -639,8 +639,7 @@ def HeroNewLevel(Hero):
             Hero.chIncreaseSpecialTrait('Trader')
             spoints -= 1
         else:
-            print('There is no otion to choose', strait + '''. Be careful, use only
-                  digits''')
+            print('There is no option to choose', strait + '''. Be careful, use only digits!''')
 
 def NewGame():
     ''' Function to start new game. It's create character for hero, create File
