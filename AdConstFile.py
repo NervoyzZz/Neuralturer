@@ -13,6 +13,14 @@
     some setups for them (classes like archer, warrior, thief, etc.)
     In area these classes will use clearly. Field Enemies I create as I see them
 '''
+# Data File name
+constDataFileName = 'GameData.NEU'
+# common traits tuple
+constCommonTraits = ('Vitality', 'Strength', 'Luck', 'Agility', 'Accuracy',
+                     'Attention', 'Charisma', 'Intelligence', 'Instinct')
+# Special traits tuple
+constSpecialTraits = ('Undead', 'Carrier', 'QuickHand', 'OnePunch', 'Physician',
+                      'Trader')
 # Random functions for trips
 constEasyTrip = {'EasyEnemy': 80, 'AnimalEnemy': 15, 'MediumEnemy': 5 }
 constMediumTrip = {'EasyEnemy': 15, 'AnimalEnemy': 10, 'MediumEnemy': 70,
@@ -217,7 +225,7 @@ constAnyArmour = (constClothesArmour, constLightArmour, constHeavyArmour)
 
 # Hero starting items
 constHeroStartWeapon = {'Name': 'Heirloom sword fragment', 'Description': """It's your heirloom,
-                        this sword fragment is very important fro you. You're ready to die for
+                        this sword fragment is very important for you. You're ready to die for
                         it.""", 'Price': 0, 'Damage': (1, 3), 'AttackSpeed': 30}
 
 constHeroStartArmour = {'Name': 'Road robe', 'Description': """Old road robe. You walk a long

@@ -1,8 +1,14 @@
 # Neuralturer game
 # File with useful functional
 
+# to make random choices
 from random import randint, choice
+# to save data to file
+from pickle import dump, load
+# to check file exists
+import os.path
 from AdConstFile import *
+
 
 class clWeapon:
     """ Weapon class
@@ -248,7 +254,7 @@ class clCharacter:
             print("Name:", self.__chGeneralParam['Name'], " "*5,
                   "Level:", self.__chGeneralParam['Level'], " "*5,
                   "Exp:", str(self.__chGeneralParam['Experience']) + '/' +
-                  str(chHowMuchExpNeed(self.__chGeneralParam['Level'])), " "*5,
+                  str(chHowMuchExpNeed(self.__chGeneralParam['Level'] + 1)), " "*5,
                   "Gold:", self.__chGeneralParam['Gold'])
             print("Health:", str(self.__chGeneralParam['CHealth']) + '/' + str(
                   self.__chGeneralParam['MHealth']))
@@ -579,3 +585,138 @@ def EnemyGenerationByTrip(TripType, HeroLvl = 25):
     # and we should set health of enemy to MAX
     resEnemy.chSetGeneralParam('CHealth', resEnemy.chGetGeneralParam('MHealth'))
     return resEnemy
+
+def HeroNewLevel(Hero):
+    ''' Function that makes all durty work to increase Hero lvl '''
+    # first we need to change current Hero Experience
+    exp = (chHowMuchExpNeed(Hero.chGetGeneralParam('Level')) -
+          Hero.chGetGeneralParam('Experience'))
+    Hero.chChangeGeneralParam('Level', 1)
+    Hero.chSetGeneralParam('Experience', exp)
+    # on 1st lvl Hero gets 3 points
+    points = (3 if Hero.chGetGeneralParam('Level') else 1)
+    # every 10 lvl Hero gets 1 point to increase Special Trait
+    spoints = (1 if Hero.chGetGeneralParam('Level') // 10 > 0 and
+               Hero.chGetGeneralParam('Level') % 10 == 0 else 0)
+    while points > 0:
+        print('You have', points, 'Trait Points')
+        print('Your traits:')
+        for key in constCommonTraits:
+            print(key, Hero.chGetCommonTrait(key))
+        print("What would you like to increase?")
+        trait = input('[> ').lower().capitalize()
+        if trait in constCommonTraits:
+            Hero.chIncreaseCommonTrait(trait)
+            points -= 1
+        else:
+            print('There is no', trait + '. Try again!')
+    while spoints > 0:
+        print('You have', spoints, 'Special Trait Points')
+        print("It's time to decide what you want to improve.")
+        print('1. You want to be a healthfuly man with a good health')
+        print('2. You want to be a strong man, who can carry more weight')
+        print('3. You are enviouse of the wind, so you want to be faster')
+        print('4. You prefer a power, so you want to deliver more damage')
+        print('5. Life is what we need, so you want to learn about restoration')
+        print('6. Everithing in the world can be bought, so you want to have G O L D')
+        strait = input('You decide [> ')
+        if strait == '1':
+            Hero.chIncreaseSpecialTrait('Undead')
+            spoints -= 1
+        elif strait == '2':
+            Hero.chIncreaseSpecialTrait('Carrier')
+            spoints -= 1
+        elif strait == '3':
+            Hero.chIncreaseSpecialTrait('QuickHand')
+            spoints -= 1
+        elif strait == '4':
+            Hero.chIncreaseSpecialTrait('OnePunch')
+            spoints -= 1
+        elif strait == '5':
+            Hero.chIncreaseSpecialTrait('Physician')
+            spoints -= 1
+        elif strait == '6':
+            Hero.chIncreaseSpecialTrait('Trader')
+            spoints -= 1
+        else:
+            print('There is no otion to choose', strait + '''. Be careful, use only
+                  digits''')
+
+def NewGame():
+    ''' Function to start new game. It's create character for hero, create File
+        constDataFileName (see in AdConstFile).
+        Return (clCharacter, Inventory), where
+        Inventory = (list of Weapon, list of Armour)
+    '''
+    res = ()
+    Hero = clCharacter()
+    HeroWeapons = []
+    HeroArmours = []
+    startWeapon = clWeapon(constHeroStartWeapon['Name'], constHeroStartWeapon['Description'],
+                           constHeroStartWeapon['Price'], constHeroStartWeapon['Damage'][0],
+                           constHeroStartWeapon['Damage'][1], constHeroStartWeapon['AttackSpeed'])
+    startArmour = clArmour(constHeroStartArmour['Name'], constHeroStartArmour['Description'],
+                           constHeroStartArmour['Price'], constHeroStartArmour['HealthBoost'],
+                           constHeroStartArmour['SpeedBoost'])
+    HeroWeapons.append(startWeapon)
+    HeroArmours.append(startArmour)
+    Hero.chAddWeapon(startWeapon)
+    Hero.chAddArmour(startArmour)
+    print('Here will be a Hero history')
+    print("Now, it's time to remember who are you. What's your name?")
+    name = input('[> ')
+    Hero.chChangeGeneralParam('Name', name)
+    HeroNewLevel(Hero)
+    Hero.chSetGeneralParam('CHealth', Hero.chGetGeneralParam('MHealth'))
+    Hero.chSetGeneralParam('PotionSlots', [1, 1])
+    res = (Hero, (HeroWeapons, HeroArmours))
+    f = open(constDataFileName, 'bw')
+    dump(res, f)
+    f.close()
+    return res
+
+def ContinueGame():
+    ''' Function to continue game. It's read File constDataFileName and returns
+        (clCharacter, (List of Weapon, List of Armour))
+        It doesn't check file exists. It will be checked in function that will
+        call ContinueGame
+    '''
+    f = open(constDataFileName, 'br')
+    res = load(f)
+    f.close()
+    return res
+
+def AboutGame():
+    ''' Just info about the game. It will be shown if user choose About in MainMenu '''
+    print('There will be Game Info')
+
+def MainMenu():
+    ''' Function that show Main Menu of the game. User can choose what he
+        want to do (Start New Game, Continue, show info About the game
+        and Exit from game)
+    '''
+    res = 0
+    print('~~~~~____Neuralturer____~~~~~')
+    print('Main Menu')
+    print('Input digit corresponding option that you want')
+    canContinue = 0
+    if os.path.exists(constDataFileName):
+        canContunue = 1
+        print('1. Continue Game')
+    print(str(1 + canContinue) + '. New Game')
+    print(str(2 + canContinue) + '. About')
+    print(str(3 + canContinue) + '. Exit')
+    userChoice = input('[> ')
+    if canContinue and userChoice == '1':
+        res = ContinueGame()
+    elif userChoice == str(1 + canContinue):
+        res = NewGame()
+    elif userChoice == str(2 + canContinue):
+        AboutGame()
+        res = MainMenu()
+    elif userChoice == str(3 + canContinue):
+        exit()
+    else:
+        print("There's no option", userChoice + '! Try again')
+        res = MainMenu()
+    return res
