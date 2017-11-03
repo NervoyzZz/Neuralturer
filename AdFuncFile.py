@@ -736,12 +736,12 @@ def CityMarket(Hero, Inventory):
         each type.
     '''
     # what you can buy
-    WeaponRange = (choice(constDaggerWeapon), choice(constSwordWeapon),
+    WeaponRange = [choice(constDaggerWeapon), choice(constSwordWeapon),
                    choice(constAxeWeapon), choice(constSpearWeapon),
                    choice(constGreatSwordWeapon), choice(constHammerWeapon),
-                   choice(constBowWeapon))
-    ArmourRange = (choice(constClothesArmour), choice(constLightArmour),
-                   choice(constHeavyArmour))
+                   choice(constBowWeapon)]
+    ArmourRange = [choice(constClothesArmour), choice(constLightArmour),
+                   choice(constHeavyArmour)]
     PotionRange = ({'Name': 'Heal Potion', 'Description':"""This potion can
                     restore your health""", 'Price': 20},
                     {'Name': 'Damage Potion', 'Description': """This potion
@@ -758,9 +758,9 @@ def CityMarket(Hero, Inventory):
         if PlayerChoice == '1':
             # list of available weapons
             for i in range(0, len(WeaponRange)):
-                print(str(i) + '.', WeaponRange[i]['Name'], 'Damage:',
-                      WeaponRange[i]['MinDamage'], '-', WeaponRange[i]['MaxDamage'],
-                      'Speed:', WeaponRange[i]['AttackSpeed'], 'Price:',
+                print(str(i) + '.', WeaponRange[i]['Name'], ' '*3, 'Damage:',
+                      WeaponRange[i]['Damage'][0], '-', WeaponRange[i]['Damage'][1],
+                      ' '*3, 'Speed:', WeaponRange[i]['AttackSpeed'], ' '*3, 'Price:',
                       WeaponRange[i]['Price'])
             print('8. Leave')
             pch = input('You decided: [> ')
@@ -776,8 +776,8 @@ def CityMarket(Hero, Inventory):
                         weapon = clWeapon(WeaponRange[pch]['Name'],
                                           WeaponRange[pch]['Description'],
                                           WeaponRange[pch]['Price'],
-                                          WeaponRange[pch]['MinDamage'],
-                                          WeaponRange[pch]['MaxDamage'],
+                                          WeaponRange[pch]['Damage'][0],
+                                          WeaponRange[pch]['Damage'][1],
                                           WeaponRange[pch]['AttackSpeed'])
                         # you get it
                         Hero.chAddWeapon(weapon)
@@ -790,9 +790,9 @@ def CityMarket(Hero, Inventory):
         elif PlayerChoice == '2':
             # same with armour
             for i in range(0, len(ArmourRange)):
-                print(str(i) + '.', ArmourRange[i]['Name'], 'Health boost:',
-                      ArmourRange[i]['HealthBoost'], 'Speed boost:',
-                      ArmourRange[i]['SpeedBoost'], 'Price:', WeaponRange[i]['Price'])
+                print(str(i) + '.', ArmourRange[i]['Name'], ' '*3, 'Health boost:',
+                      ArmourRange[i]['HealthBoost'], ' '*3, 'Speed boost:',
+                      ArmourRange[i]['SpeedBoost'], ' '*3,  'Price:', WeaponRange[i]['Price'])
             print('3. Leave')
             pch = input('You decided: [> ')
             if pch in '1230':
@@ -818,7 +818,7 @@ def CityMarket(Hero, Inventory):
         elif PlayerChoice == '3':
             # Potions
             for i in range(0, len(PotionRange)):
-                print(str(i) + '.', PotionRange[i]['Name'],
+                print(str(i) + '.', PotionRange[i]['Name'], ' '*5,
                       'Price:', PotionRange[i]['Price'])
             print('2. Leave')
             pch = input('You decided: [> ')
@@ -828,11 +828,15 @@ def CityMarket(Hero, Inventory):
                 else:
                     pch = int(pch)
                     if Hero.chGetGeneralParam('Gold') >= PotionRange[pch]['Price']:
-                        Hero.chSetGeneralParam('Gold',
-                            Hero.chGetGeneralParam('Gold') - PotionRange[pch]['Price'])
-                        hpot = Hero.chGetGeneralParam('PotionSlots')[0]
-                        dpot = Hero.chGetGeneralParam('PotionSlots')[1]
-                        pot = ([hpot + 1, dpot] if pch == 0 else [hpot, dpot + 1])
+                        if Hero.chGetGeneralParam('PotionSlots')[pch] < Hero.chGetGeneralParam('MaxPotion'):
+                            Hero.chSetGeneralParam('Gold',
+                                Hero.chGetGeneralParam('Gold') - PotionRange[pch]['Price'])
+                            hpot = Hero.chGetGeneralParam('PotionSlots')[0]
+                            dpot = Hero.chGetGeneralParam('PotionSlots')[1]
+                            pot = ([hpot + 1, dpot] if pch == 0 else [hpot, dpot + 1])
+                            Hero.chSetGeneralParam('PotionSlots', pot)
+                        else:
+                            print('No free space!')
                     else:
                         print('Not enough GOLD!')
             else:
@@ -859,9 +863,9 @@ def HeroInfoOption(Hero, Inventory):
         elif PlayerChoice == '3':
             print('You have next weapons.')
             for i in range(0, len(Inventory[0])):
-                print('~~~~~~~~~~~~~~~')
-                print(Inventory[0][i]['Name'])
-                print(Inventory[0][i]['Description'])
+                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+                print(str(i) + '.', Inventory[0][i]['Name'])
+                print(' '.join(Inventory[0][i]['Description'].split()))
             print('What you want to equip? (-1 for nothing)')
             pch = input('You decided: [> ')
             if pch.isdigit():
@@ -876,9 +880,10 @@ def HeroInfoOption(Hero, Inventory):
         elif PlayerChoice == '4':
             print('You have next armours.')
             for i in range(0, len(Inventory[1])):
-                print('~~~~~~~~~~~~~~~')
+                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
                 print(Inventory[1][i]['Name'])
-                print(Inventory[1][i]['Description'])
+                print(' '.join(Inventory[1][i]['Description'].split()))
+            print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
             print('What you want to equip? (-1 for nothing)')
             pch = input('You decided: [> ')
             if pch.isdigit():
