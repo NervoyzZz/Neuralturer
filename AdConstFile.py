@@ -1,4 +1,10 @@
-# Neuralturer game
+# ------------------------------------------------------------------------------
+# Copyright © 2017 Daniil Nepryahin
+# contacts: <nervoidaz@yandex.ru>
+# License: https://opensource.org/licenses/cpl1.0.php
+# ------------------------------------------------------------------------------
+
+
 # Addictional file with 'constants' that very useful
 
 ''' It's time to create some global constants
@@ -100,7 +106,7 @@ constSpearWeapon = ({'Name': 'Rusty spear', 'Description': """It's an old rusty
                       than axes.""", 'Price': 1700, 'Damage': (10, 15),
                       'AttackSpeed': 20},
 
-                     {'Name': 'Balanced Axe', 'Description': """It's good
+                     {'Name': 'Balanced Spear', 'Description': """It's good
                       spear that was well balanced and sharpened.""",
                       'Price': 2500, 'Damage': (12, 18),
                       'AttackSpeed': 20})
@@ -153,9 +159,9 @@ constBowWeapon = ({'Name': 'Old bow', 'Description': """This bow was sold by old
                    'AttackSpeed': 15},
 
                   {'Name': 'Elvegr bow', 'Description': """The tale of this great beautiful
-                   carved bow is that it was made by Elvengr race master. This bow is the top
+                   carved bow is that it was made by Elvegr race master. This bow is the top
                    of skill. It allows shoot fast and deal a lot damage. What can be better
-                   for accurte marksman?""", 'Price': 2100, 'Damage': (17, 20),
+                   for accurate marksman?""", 'Price': 2100, 'Damage': (17, 20),
                    'AttackSpeed': 15})
 
 constAnyWeapon = (constDaggerWeapon, constSwordWeapon, constAxeWeapon, constSpearWeapon,
@@ -209,12 +215,12 @@ constHeavyArmour = ({'Name': 'Iron armour', 'Description': """Cheap heavy armour
                      'SpeedBoost': -15},
 
                     {'Name': 'Mail armour', 'Description': """Shirt that made with thousands
-                     iron rings. It's heavy and it offer real protection.""", 'Price': 1000,
+                     iron rings. It's heavy and it offers real protection.""", 'Price': 1000,
                      'HealthBoost': 30, 'SpeedBoost': -10},
 
                     {'Name': 'Lamellar armour', 'Description': """Heavy armour that made with
                      two layers. First is leather armor, second is made with a lot of steel
-                     plates. This armour provide a greate protection.""", 'Price': 1500,
+                     plates. This armour provides a great protection.""", 'Price': 1500,
                      'HealthBoost': 40, 'SpeedBoost': -25},
 
                     {'Name': 'Plate armour', 'Description': """Piece of metal. Who can pierce
@@ -224,9 +230,10 @@ constHeavyArmour = ({'Name': 'Iron armour', 'Description': """Cheap heavy armour
 constAnyArmour = (constClothesArmour, constLightArmour, constHeavyArmour)
 
 # Hero starting items
-constHeroStartWeapon = {'Name': 'Heirloom sword fragment', 'Description': """It's your heirloom,
-                        this sword fragment is very important for you. You're ready to die for
-                        it.""", 'Price': 0, 'Damage': (1, 3), 'AttackSpeed': 30}
+constHeroStartWeapon = {'Name': 'Family heirloom sword fragment', 'Description':
+                        """It's your family heirloom, this sword fragment is very
+                        important for you. You're ready to die for it.""",
+                        'Price': 0, 'Damage': (1, 3), 'AttackSpeed': 30}
 
 constHeroStartArmour = {'Name': 'Road robe', 'Description': """Old road robe. You walk a long
                         way with this clothes on.""", 'Price': 0, 'HealthBoost': 0,

@@ -1,4 +1,10 @@
-# Neuralturer game
+# ------------------------------------------------------------------------------
+# Copyright © 2017 Daniil Nepryahin
+# contacts: <nervoidaz@yandex.ru>
+# License: https://opensource.org/licenses/cpl1.0.php
+# ------------------------------------------------------------------------------
+
+
 # File with useful functional
 
 # to make random choices
@@ -33,6 +39,11 @@ class clWeapon:
         self.__wpGeneralParam['AttackSpeed'] = AttackSpeed
     def __getitem__(self, key):
         return self.__wpGeneralParam[key]
+    def __eq__(self, other):
+        res = 1
+        for key in self.__wpGeneralParam.keys():
+            res = res and self.__wpGeneralParam[key] == other.__wpGeneralParam[key]
+        return res
 
     def wpShowInfo(self):
         ''' Just show info about Weapon '''
@@ -63,6 +74,11 @@ class clArmour:
         self.__arGeneralParam['SpeedBoost'] = SpeedBoost
     def __getitem__(self, key):
         return self.__arGeneralParam[key]
+    def __eq__(self, other):
+        res = 1
+        for key in self.__arGeneralParam.keys():
+            res = res and self.__arGeneralParam[key] == other.__arGeneralParam[key]
+        return res
 
     def arShowInfo(self):
         ''' Just show info about Weapon '''
@@ -697,14 +713,16 @@ def MainMenu():
     res = 0
     print('~~~~~____Neuralturer____~~~~~')
     print('Main Menu')
-    print('Input digit corresponding option that you want')
+    print('Input digit that corresponding option that you want to choose')
+    print()
     canContinue = 0
     if os.path.exists(constDataFileName):
-        canContunue = 1
+        canContinue = 1
         print('1. Continue Game')
     print(str(1 + canContinue) + '. New Game')
     print(str(2 + canContinue) + '. About')
     print(str(3 + canContinue) + '. Exit')
+    print()
     userChoice = input('[> ')
     if canContinue and userChoice == '1':
         res = ContinueGame()
@@ -742,12 +760,21 @@ def CityMarket(Hero, Inventory):
                    choice(constBowWeapon)]
     ArmourRange = [choice(constClothesArmour), choice(constLightArmour),
                    choice(constHeavyArmour)]
-    PotionRange = ({'Name': 'Heal Potion', 'Description':"""This potion can
-                    restore your health""", 'Price': 20},
-                    {'Name': 'Damage Potion', 'Description': """This potion
-                     can increase your strength for short time""", 'Price': 20})
+    # Price of a bottle of Potion
+    PotPrice = 20
     PlayerChoice = '0'
+    weapstr = '70123456'
+    armstr = '3012'
     while PlayerChoice != '4':
+        # How much Potion Hero need to buy for full stack
+        HM4FullHeal = (Hero.chGetGeneralParam('MaxPotion') -
+                       Hero.chGetGeneralParam('PotionSlots')[0])
+        HM4FullDamage = (Hero.chGetGeneralParam('MaxPotion') -
+                         Hero.chGetGeneralParam('PotionSlots')[1])
+        PotionRange = ({'Name': 'Heal Potion', 'Price': PotPrice},
+                       {'Name': 'Heal Potion (full)', 'Price': PotPrice * HM4FullHeal},
+                       {'Name': 'Damage Potion', 'Price': PotPrice},
+                       {'Name': 'Damage Potion (full)', 'Price': PotPrice * HM4FullDamage})
         print('_____MARKET_____')
         print('1. Visit weaponsmith')
         print('2. Visit armoursmith')
@@ -756,6 +783,9 @@ def CityMarket(Hero, Inventory):
         print()
         PlayerChoice = input('You decided: [> ')
         if PlayerChoice == '1':
+            print()
+            print('You have', Hero.chGetGeneralParam('Gold'), 'golds')
+            print('~'*15)
             # list of available weapons
             for i in range(0, len(WeaponRange)):
                 print(str(i) + '.', WeaponRange[i]['Name'], ' '*3, 'Damage:',
@@ -763,84 +793,118 @@ def CityMarket(Hero, Inventory):
                       ' '*3, 'Speed:', WeaponRange[i]['AttackSpeed'], ' '*3, 'Price:',
                       WeaponRange[i]['Price'])
             print('8. Leave')
+            print()
             pch = input('You decided: [> ')
-            if pch in '123456780':
+            if pch in weapstr:
                 if pch == '8':
                     PlayerChoice = 0
                 else:
                     pch = int(pch)
                     # you can buy if you have enough golds
                     if Hero.chGetGeneralParam('Gold') >= WeaponRange[pch]['Price']:
-                        Hero.chSetGeneralParam('Gold',
-                            Hero.chGetGeneralParam('Gold') - WeaponRange[pch]['Price'])
+
                         weapon = clWeapon(WeaponRange[pch]['Name'],
                                           WeaponRange[pch]['Description'],
                                           WeaponRange[pch]['Price'],
                                           WeaponRange[pch]['Damage'][0],
                                           WeaponRange[pch]['Damage'][1],
                                           WeaponRange[pch]['AttackSpeed'])
-                        # you get it
-                        Hero.chAddWeapon(weapon)
-                        Inventory[0].append(weapon)
-                        WeaponRange.remove(WeaponRange[pch])
+                        if weapon in Inventory[0]:
+                            print('You have that one!')
+                        else:
+                            Hero.chSetGeneralParam('Gold',
+                                Hero.chGetGeneralParam('Gold') - WeaponRange[pch]['Price'])
+                            # you get it
+                            Hero.chAddWeapon(weapon)
+                            Inventory[0].append(weapon)
+                            WeaponRange.remove(WeaponRange[pch])
+                            weapstr = weapstr[0: -1]
+                            print('You got it!')
+                            print('And now you have', Hero.chGetGeneralParam('Gold'), 'golds')
                     else:
                         print('Not enough GOLD!')
+                        print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
             else:
                 print('Imposible to choose', pch)
+            print()
         elif PlayerChoice == '2':
+            print()
+            print('You have', Hero.chGetGeneralParam('Gold'), 'golds')
+            print('~'*15)
             # same with armour
             for i in range(0, len(ArmourRange)):
                 print(str(i) + '.', ArmourRange[i]['Name'], ' '*3, 'Health boost:',
                       ArmourRange[i]['HealthBoost'], ' '*3, 'Speed boost:',
-                      ArmourRange[i]['SpeedBoost'], ' '*3,  'Price:', WeaponRange[i]['Price'])
+                      ArmourRange[i]['SpeedBoost'], ' '*3,  'Price:', ArmourRange[i]['Price'])
             print('3. Leave')
+            print()
             pch = input('You decided: [> ')
-            if pch in '1230':
+            if pch in armstr:
                 if pch == '3':
                     PlayerChoice = 0
                 else:
                     pch = int(pch)
                     if Hero.chGetGeneralParam('Gold') >= ArmourRange[pch]['Price']:
-                        Hero.chSetGeneralParam('Gold',
-                            Hero.chGetGeneralParam('Gold') - ArmourRange[pch]['Price'])
                         armour = clArmour(ArmourRange[pch]['Name'],
                                           ArmourRange[pch]['Description'],
                                           ArmourRange[pch]['Price'],
                                           ArmourRange[pch]['HealthBoost'],
                                           ArmourRange[pch]['SpeedBoost'])
-                        Hero.chAddArmour(armour)
-                        Inventory[1].append(armour)
-                        ArmourRange.remove(ArmourRange[pch])
+                        if armour in Inventory[1]:
+                            print('You have that one!')
+                        else:
+                            Hero.chSetGeneralParam('Gold',
+                                Hero.chGetGeneralParam('Gold') - ArmourRange[pch]['Price'])
+                            Hero.chAddArmour(armour)
+                            Inventory[1].append(armour)
+                            ArmourRange.remove(ArmourRange[pch])
+                            armstr = armstr[0: -1]
+                            print('You got it!')
+                            print('And now you have', Hero.chGetGeneralParam('Gold'), 'golds')
                     else:
                         print('Not enough GOLD!')
+                        print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
             else:
                 print('Imposible to choose', pch)
+            print()
         elif PlayerChoice == '3':
+            print()
+            print('You have', Hero.chGetGeneralParam('Gold'), 'golds')
+            print('~'*15)
             # Potions
             for i in range(0, len(PotionRange)):
                 print(str(i) + '.', PotionRange[i]['Name'], ' '*5,
-                      'Price:', PotionRange[i]['Price'])
-            print('2. Leave')
+                      PotionRange[i]['Price'])
+            print('4. Leave')
+            print()
             pch = input('You decided: [> ')
-            if pch in '120':
-                if pch == '2':
+            if pch in '01234':
+                if pch == '4':
                     PlayerChoice = 0
                 else:
                     pch = int(pch)
                     if Hero.chGetGeneralParam('Gold') >= PotionRange[pch]['Price']:
-                        if Hero.chGetGeneralParam('PotionSlots')[pch] < Hero.chGetGeneralParam('MaxPotion'):
+                        k = (0 if pch in (0, 1) else 1)
+                        if Hero.chGetGeneralParam('PotionSlots')[k] < Hero.chGetGeneralParam('MaxPotion'):
                             Hero.chSetGeneralParam('Gold',
                                 Hero.chGetGeneralParam('Gold') - PotionRange[pch]['Price'])
                             hpot = Hero.chGetGeneralParam('PotionSlots')[0]
                             dpot = Hero.chGetGeneralParam('PotionSlots')[1]
-                            pot = ([hpot + 1, dpot] if pch == 0 else [hpot, dpot + 1])
+                            if pch % 2 == 0:
+                                 pot = ([hpot + 1, dpot] if pch == 0 else [hpot, dpot + 1])
+                            else:
+                                pot = ([hpot + HM4FullHeal, dpot] if pch == 1 else [hpot, dpot + HM4FullDamage])
                             Hero.chSetGeneralParam('PotionSlots', pot)
+                            print('You got it!')
+                            print('And now you have', Hero.chGetGeneralParam('Gold'), 'golds')
                         else:
                             print('No free space!')
                     else:
                         print('Not enough GOLD!')
+                        print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
             else:
                 print('Imposible to choose', pch)
+            print()
 
 def HeroInfoOption(Hero, Inventory):
     ''' This function can show Hero information as chShowInfo and show Inventory.
@@ -848,11 +912,11 @@ def HeroInfoOption(Hero, Inventory):
     '''
     PlayerChoice = '0'
     while PlayerChoice != '5':
-        print('_____Player Info_____')
+        print('_____Hero Information_____')
         print('1. General info')
         print('2. Full info')
-        print('3. Weapons')
-        print('4. Armours')
+        print('3. Weapons in inventory')
+        print('4. Armours in inventory')
         print('5. Back')
         print()
         PlayerChoice = input('You decided: [> ')
@@ -863,35 +927,45 @@ def HeroInfoOption(Hero, Inventory):
         elif PlayerChoice == '3':
             print('You have next weapons.')
             for i in range(0, len(Inventory[0])):
-                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-                print(str(i) + '.', Inventory[0][i]['Name'])
+                print('~'*40)
+                print(str(i) + '.', Inventory[0][i]['Name'], ' '*5, 'Damage:',
+                      Inventory[0][i]['MinDamage'], '-', Inventory[0][i]['MaxDamage'],
+                      ' '*5, 'Attack speed:', Inventory[0][i]['AttackSpeed'])
                 print(' '.join(Inventory[0][i]['Description'].split()))
-            print('What you want to equip? (-1 for nothing)')
+            print('~'*40)
+            print()
+            print('What do you want to equip? (00 for nothing)')
             pch = input('You decided: [> ')
             if pch.isdigit():
-                if pch == '-1':
+                if pch == '00':
                     PlayerChoice = '0'
                 elif int(pch) >= len(Inventory[0]):
                     print('Incorrect input!')
                 else:
                     Hero.chAddWeapon(Inventory[0][int(pch)])
+                    print('You equiped it!')
             else:
                 print('Impossible to choose', pch)
         elif PlayerChoice == '4':
             print('You have next armours.')
             for i in range(0, len(Inventory[1])):
-                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-                print(Inventory[1][i]['Name'])
+                print('~'*40)
+                print(str(i) + '.', Inventory[1][i]['Name'], ' '*5, 'Health boost:',
+                      Inventory[1][i]['HealthBoost'], ' '*5, 'Speed boost:',
+                      Inventory[1][i]['SpeedBoost'])
                 print(' '.join(Inventory[1][i]['Description'].split()))
-            print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-            print('What you want to equip? (-1 for nothing)')
+            print('~'*40)
+            print()
+            print('What do you want to equip? (00 for nothing)')
             pch = input('You decided: [> ')
             if pch.isdigit():
-                if pch == '-1':
+                if pch == '00':
                     PlayerChoice = '0'
                 elif int(pch) >= len(Inventory[1]):
                     print('Incorrect input!')
                 else:
                     Hero.chAddArmour(Inventory[1][int(pch)])
+                    print('You equiped it!')
             else:
                 print('Impossible to choose', pch)
+        print()
