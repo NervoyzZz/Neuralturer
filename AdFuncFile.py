@@ -609,6 +609,11 @@ def HeroNewLevel(Hero):
            chHowMuchExpNeed(Hero.chGetGeneralParam('Level') + 1))
     Hero.chChangeGeneralParam('Level', 1)
     Hero.chSetGeneralParam('Experience', exp)
+    # idea is: if hero has full health then after lvl up he will be with full health
+    # if hero was healthy then he will be healthy, but if he was bitten then he
+    # can't be healthy after lvl up.
+    FullHealthFlag = (1 if Hero.chGetGeneralParam('CHealth') == Hero.chGetGeneralParam('MHealth')
+                      else 0)
     # on 1st lvl Hero gets 3 points
     points = (3 if Hero.chGetGeneralParam('Level') == 1 else 1)
     # every 10 lvl Hero gets 1 point to increase Special Trait
@@ -656,6 +661,8 @@ def HeroNewLevel(Hero):
             spoints -= 1
         else:
             print('There is no option to choose', strait + '''. Be careful, use only digits!''')
+    if FullHealthFlag:
+        Hero.chSetGeneralParam('CHealth', Hero.chGetGeneralParam('MHealth'))
 
 def NewGame():
     ''' Function to start new game. It's create character for hero, create File
@@ -765,6 +772,12 @@ def CityMarket(Hero, Inventory):
     PlayerChoice = '0'
     weapstr = '70123456'
     armstr = '3012'
+    # idea is: if hero has full health then after wearing new armour up he will
+    # be with full health
+    # if hero was healthy then he will be healthy, but if he was bitten then he
+    # can't be healthy after wearing new armour.
+    FullHealthFlag = (1 if Hero.chGetGeneralParam('CHealth') == Hero.chGetGeneralParam('MHealth')
+                      else 0)
     while PlayerChoice != '4':
         # How much Potion Hero need to buy for full stack
         HM4FullHeal = (Hero.chGetGeneralParam('MaxPotion') -
@@ -861,6 +874,8 @@ def CityMarket(Hero, Inventory):
                             armstr = armstr[0: -1]
                             print('You got it!')
                             print('And now you have', Hero.chGetGeneralParam('Gold'), 'golds')
+                            if FullHealthFlag:
+                                Hero.chSetGeneralParam('CHealth', Hero.chGetGeneralParam('MHealth'))
                     else:
                         print('Not enough GOLD!')
                         print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
@@ -911,6 +926,12 @@ def HeroInfoOption(Hero, Inventory):
         Player can equip item from Inventory
     '''
     PlayerChoice = '0'
+    # idea is: if hero has full health then after wearing new armour up he will
+    # be with full health
+    # if hero was healthy then he will be healthy, but if he was bitten then he
+    # can't be healthy after wearing new armour.
+    FullHealthFlag = (1 if Hero.chGetGeneralParam('CHealth') == Hero.chGetGeneralParam('MHealth')
+                      else 0)
     while PlayerChoice != '5':
         print('_____Hero Information_____')
         print('1. General info')
@@ -966,6 +987,147 @@ def HeroInfoOption(Hero, Inventory):
                 else:
                     Hero.chAddArmour(Inventory[1][int(pch)])
                     print('You equiped it!')
+                    if FullHealthFlag:
+                        Hero.chSetGeneralParam('CHealth', Hero.chGetGeneralParam('MHealth'))
             else:
                 print('Impossible to choose', pch)
         print()
+
+def TownPhysician(Hero, type = 'Main'):
+    ''' Option Visit Physician in some places.
+        In Main city you can pay for full health restoring and for BattleRestoring
+        In one place, there will be only free full restoration
+    '''
+    PlayerChoice = '-1'
+    fulprice = 100
+    poulticeprice = 30
+    while PlayerChoice != '3':
+        print('_____PHYSICIAN_____')
+        # there will be if for unique place where it's free to full restoration
+        print('1. Ask for full healing (100 golds)')
+        print('2. Ask for healing poultice (max restore',
+              str(Hero.chGetGeneralParam('BattleRestore') *
+              Hero.chGetGeneralParam('MHealth') // 100), ') (30 golds)')
+        print('3. Leave')
+        print()
+        print('You have', Hero.chGetGeneralParam('Gold'), 'golds')
+        print('And now your health:', str(Hero.chGetGeneralParam('CHealth')) + '/' +
+              str(Hero.chGetGeneralParam('MHealth')))
+        PlayerChoice = input('You decided: [> ')
+        if PlayerChoice == '1':
+            if Hero.chGetGeneralParam('CHealth') == Hero.chGetGeneralParam('MHealth'):
+                print('You are in full health!')
+            else:
+                if Hero.chGetGeneralParam('Gold') >= fulprice:
+                    Hero.chHealthRestore(1)
+                    Hero.chChangeGeneralParam('Gold', -fulprice)
+                    print('Now you have', Hero.chGetGeneralParam('Gold'), 'golds')
+                    print('And your health:', str(Hero.chGetGeneralParam('CHealth')) + '/' +
+                          str(Hero.chGetGeneralParam('MHealth')))
+                else:
+                    print('Not enough GOLD!')
+                    print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
+        elif PlayerChoice == '2':
+            if Hero.chGetGeneralParam('CHealth') == Hero.chGetGeneralParam('MHealth'):
+                print('You are in full health!')
+            else:
+                if Hero.chGetGeneralParam('Gold') >= poulticeprice:
+                    Hero.chHealthRestore()
+                    Hero.chChangeGeneralParam('Gold', -poulticeprice)
+                    print('Now you have', Hero.chGetGeneralParam('Gold'), 'golds')
+                    print('And your health:', str(Hero.chGetGeneralParam('CHealth')) + '/' +
+                          str(Hero.chGetGeneralParam('MHealth')))
+                else:
+                    print('Not enough GOLD!')
+                    print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
+        elif PlayerChoice != '3':
+            print('Impossible to choose', PlayerChoice)
+            print('Try again!')
+        print()
+
+def HeroEnemyBattle(Hero, Enemy, type):
+    ''' function that makes Hero fights with Enemy.
+        type can be 'Arena' and 'Field'. It influence on some parameters of battle
+        function returns (WinFlag, FleeFlag). WinFlag = 1 if Hero Win
+        FleeFlag = 0 if Nobody fleed, 1 if Flee Hero and 2 if Flee Enemy.
+        Function just hits Hero and Enemy and uses their Potions. It doesn't
+        reward participants. You should do it with your own hands.
+    '''
+    # define result variables
+    WinFlag = -1
+    FleeFlag = 0
+    # who is attacker and who is defender
+    if type == 'Arena':
+        a = choice((0, 1))
+        if a:
+            attacker, defender = Hero, Enemy
+        else:
+            attacker, defender = Enemy, Hero
+    elif type == 'Field':
+        # who is more lucky
+        if Hero.chGetCommonTrait('Luck') > Enemy.chGetCommonTrait('Luck'):
+            attacker, defender = Hero, Enemy
+        elif Hero.chGetCommonTrait('Luck') < Enemy.chGetCommonTrait('Luck'):
+            attacker, defender = Enemy, Hero
+        # if equal that random
+        else:
+            a = choice((0, 1))
+            if a:
+                attacker, defender = Hero, Enemy
+            else:
+                attacker, defender = Enemy, Hero
+    # now, count of hits for both fighters
+    atHits = (1 if attacker.chGetGeneralParam('AttackSpeed') < defender.chGetGeneralParam('AttackSpeed')
+              else round(attacker.chGetGeneralParam('AttackSpeed') / defender.chGetGeneralParam('AttackSpeed')))
+    defHits = (1 if defender.chGetGeneralParam('AttackSpeed') < attacker.chGetGeneralParam('AttackSpeed')
+              else round(defender.chGetGeneralParam('AttackSpeed') / attacker.chGetGeneralParam('AttackSpeed')))
+    # there battle will begin
+    while (attacker.chGetGeneralParam('CHealth') > 0 and
+           defender.chGetGeneralParam('CHealth') > 0 and
+        FleeFlag == 0):
+        # attacker hit. In the end of loop attacker is changed
+        print('~'*20)
+        print(attacker.chGetGeneralParam('Name'), 'prepare to smash!')
+        for i in range(0, atHits):
+            # if it isn't Arena then attacker has FleeChance
+            if type != 'Arena':
+                if (attacker.chGetGeneralParam('CHealth') < defender.chGetGeneralParam('CHealth') // 2 and
+                    WhatWillHappen({1: attacker.chGetGeneralParam('FleeChance')})):
+                    if FleeFlag == 0:
+                        FleeFlag = (1 if attacker == Hero else 2)
+                        print('Decided to flee after hit')
+            # now let's drink some potions
+            DamagePotionFlag = 0
+            if (defender.chGetGeneralParam('CHealth') < defender.chGetGeneralParam('MHealth') and
+                attacker.chGetGeneralParam('PotionSlots')[1] > 0):
+                DamagePotionFlag = 1
+                attacker.chDrinkPotion(1)
+                print('Drink Damage Potion')
+            if (attacker.chGetGeneralParam('CHealth') < attacker.chGetGeneralParam('MHealth') and
+                attacker.chGetGeneralParam('PotionSlots')[0] > 0):
+                attacker.chDrinkPotion(0)
+                print('Drink Heal Potion')
+            # attacker hits
+            hit = attacker.chDoHit()
+            defender.chChangeGeneralParam('CHealth', -hit)
+            print('Delivered', hit, 'damage!')
+            if DamagePotionFlag:
+                attacker.chDisappearPotion()
+                DamagePotionFlag = 0
+                print('Strength leaves', attacker.chGetGeneralParam('Name'))
+        # change roles
+        attacker, defender = defender, attacker
+        atHits, defHits = defHits, atHits
+    # battle ends
+    if Hero.chGetGeneralParam('CHealth') < 0 :
+        Hero.chSetGeneralParam('CHealth', 0)
+    if FleeFlag == 1:
+        WinFlag = 0
+    elif FleeFlag == 2:
+        WinFlag = 1
+    else:
+        if Hero.chGetGeneralParam('CHealth') == 0:
+            WinFlag = 0
+        else:
+            WinFlag = 1
+    return (WinFlag, FleeFlag)
