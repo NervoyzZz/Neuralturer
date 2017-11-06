@@ -559,7 +559,6 @@ def EnemyGenerationByTrip(TripType, HeroLvl = 25):
     if TripType in ('ArenaE', 'ArenaM', 'ArenaH'):
         traits.remove('Luck')
         traits.remove('Instinct')
-        print(traits)
         spTraits.remove('Trader')
     traitsProb = {}
     for keys in EnemyInfo['CommonTrait'].keys():
@@ -576,8 +575,6 @@ def EnemyGenerationByTrip(TripType, HeroLvl = 25):
             traitPoint -= 1
             if resEnemy.chGetCommonTrait(impTr) == 10:
                 traits.remove(impTr)
-                print(traits)
-                print(traitPoint)
                 # it's max size of common trait, so let's recount probability
                 # when we spend all our points for arena we will try to recount
                 # probability, that is an error. So:
@@ -1056,8 +1053,10 @@ def HeroEnemyBattle(Hero, Enemy, type):
     # define result variables
     WinFlag = -1
     FleeFlag = 0
+    # flag for some differences between arena and field
+    ArenaFlag = (1 if type == 'Arena' else 0)
     # who is attacker and who is defender
-    if type == 'Arena':
+    if ArenaFlag:
         a = choice((0, 1))
         if a:
             attacker, defender = Hero, Enemy
@@ -1081,13 +1080,22 @@ def HeroEnemyBattle(Hero, Enemy, type):
               else round(attacker.chGetGeneralParam('AttackSpeed') / defender.chGetGeneralParam('AttackSpeed')))
     defHits = (1 if defender.chGetGeneralParam('AttackSpeed') < attacker.chGetGeneralParam('AttackSpeed')
               else round(defender.chGetGeneralParam('AttackSpeed') / attacker.chGetGeneralParam('AttackSpeed')))
+    # before battle info about opponents
+    print('~'*20)
+    print(Hero.chGetGeneralParam('Name'), ' '*3, 'Health:',
+          str(Hero.chGetGeneralParam('CHealth')) + '/' + str(Hero.chGetGeneralParam('MHealth')),
+          ' '*5, Enemy.chGetGeneralParam('Name'), ' '*3, 'Health:',
+          str(Enemy.chGetGeneralParam('CHealth')) + '/' + str(Enemy.chGetGeneralParam('MHealth')))
+    print('~'*20)
     # there battle will begin
     while (attacker.chGetGeneralParam('CHealth') > 0 and
            defender.chGetGeneralParam('CHealth') > 0 and
         FleeFlag == 0):
         # attacker hit. In the end of loop attacker is changed
-        print('~'*20)
-        print(attacker.chGetGeneralParam('Name'), 'prepare to smash!')
+        # print battle log only in Arena mode
+        if ArenaFlag:
+            print('~'*20)
+            print(attacker.chGetGeneralParam('Name'), 'prepare to smash!')
         for i in range(0, atHits):
             # if it isn't Arena then attacker has FleeChance
             if type != 'Arena':
@@ -1095,32 +1103,44 @@ def HeroEnemyBattle(Hero, Enemy, type):
                     WhatWillHappen({1: attacker.chGetGeneralParam('FleeChance')})):
                     if FleeFlag == 0:
                         FleeFlag = (1 if attacker == Hero else 2)
-                        print('Decided to flee after hit')
+                        print(attacker.chGetGeneralParam('Name') + 'decided to flee.')
             # now let's drink some potions
             DamagePotionFlag = 0
             if (defender.chGetGeneralParam('CHealth') < defender.chGetGeneralParam('MHealth') and
                 attacker.chGetGeneralParam('PotionSlots')[1] > 0):
                 DamagePotionFlag = 1
                 attacker.chDrinkPotion(1)
-                print('Drink Damage Potion')
+                if ArenaFlag:
+                    print('Drink Damage Potion')
             if (attacker.chGetGeneralParam('CHealth') < attacker.chGetGeneralParam('MHealth') and
                 attacker.chGetGeneralParam('PotionSlots')[0] > 0):
                 attacker.chDrinkPotion(0)
-                print('Drink Heal Potion')
+                if ArenaFlag:
+                    print('Drink Heal Potion')
             # attacker hits
             hit = attacker.chDoHit()
             defender.chChangeGeneralParam('CHealth', -hit)
-            print('Delivered', hit, 'damage!')
+            if defender.chGetGeneralParam('CHealth') < 0:
+                defender.chSetGeneralParam('CHealth', 0)
+            if ArenaFlag:
+                print('Delivered', hit, 'damage!')
             if DamagePotionFlag:
                 attacker.chDisappearPotion()
                 DamagePotionFlag = 0
-                print('Strength leaves', attacker.chGetGeneralParam('Name'))
+                if ArenaFlag:
+                    print('Strength leaves', attacker.chGetGeneralParam('Name'))
+        # print opponents health after hits
+        if ArenaFlag:
+            print('~'*20)
+            print(Hero.chGetGeneralParam('Name'), ' '*3, 'Health:',
+                  str(Hero.chGetGeneralParam('CHealth')) + '/' + str(Hero.chGetGeneralParam('MHealth')),
+                  ' '*5, Enemy.chGetGeneralParam('Name'), ' '*3, 'Health:',
+                  str(Enemy.chGetGeneralParam('CHealth')) + '/' + str(Enemy.chGetGeneralParam('MHealth')))
+            print('~'*20)
         # change roles
         attacker, defender = defender, attacker
         atHits, defHits = defHits, atHits
     # battle ends
-    if Hero.chGetGeneralParam('CHealth') < 0 :
-        Hero.chSetGeneralParam('CHealth', 0)
     if FleeFlag == 1:
         WinFlag = 0
     elif FleeFlag == 2:
@@ -1131,3 +1151,148 @@ def HeroEnemyBattle(Hero, Enemy, type):
         else:
             WinFlag = 1
     return (WinFlag, FleeFlag)
+
+def CityArena(Hero):
+    ''' function that makes it possible to participate in competition on the Arena
+        Player makes choice, take bet and then his Hero fights. If Hero wins,
+        then he gets bet*2, experience from bitten Enemy, NewLevel, if he has enough
+        experience. And at the end, Hero full restore his health.
+    '''
+    PlayerChoice = '-1'
+    while PlayerChoice != '0':
+        PlayerBet = 0
+        print('_____ARENA_____')
+        print('1. Easy fight (bets under 100 golds)')
+        print('2. Medium fight (bets in [100; 500] golds)')
+        print('3. Hard fight (bets above 500 golds)')
+        # mb in future there will be Random Fight
+        print('0. Leave')
+        print()
+        print('You have', Hero.chGetGeneralParam('Gold'), 'golds')
+        # Easy fight
+        PlayerChoice = input('You decided: [> ')
+        if PlayerChoice == '1':
+            ContinueFlag = 0
+            # take a bet
+            while ContinueFlag == 0:
+                print('Input your bet. Must be in [1; 100]')
+                print('Input 00 to go back!')
+                PlayerBet = input('[> ')
+                if PlayerBet == '00':
+                    ContinueFlag = -1
+                elif PlayerBet.isdigit():
+                    if int(PlayerBet) <= 100 and int(PlayerBet) >= 1:
+                        if int(PlayerBet) <= Hero.chGetGeneralParam('Gold'):
+                            PlayerBet = int(PlayerBet)
+                            Hero.chChangeGeneralParam('Gold', -PlayerBet)
+                            print('Bet confirmed')
+                            ContinueFlag = 1
+                        else:
+                            print('Not enough GOLD')
+                    else:
+                        print('Incorrect input!')
+                else:
+                    print('Use only digits!')
+            # ready to fight
+            if ContinueFlag == 1:
+                Enemy = EnemyGenerationByTrip('ArenaE', Hero.chGetGeneralParam('Level'))
+                WF, FF = HeroEnemyBattle(Hero, Enemy, 'Arena')
+                # Hero wins
+                if WF == 1:
+                    print(Hero.chGetGeneralParam('Name'), 'won!')
+                    # reward
+                    Hero.chChangeGeneralParam('Gold', PlayerBet * 2)
+                    # experience
+                    Hero.chChangeGeneralParam('Experience',
+                        Enemy.chGetGeneralParam('Level') // 10 + 1)
+                    if Hero.chGetGeneralParam('Experience') >= chHowMuchExpNeed(
+                        Hero.chGetGeneralParam('Level') + 1):
+                        NewLevel(Hero)
+                print(Enemy.chGetGeneralParam('Name'), 'won!')
+                # full restoration
+                Hero.chHealthRestore(1)
+        elif PlayerChoice == '2':
+            ContinueFlag = 0
+            # take a bet
+            while ContinueFlag == 0:
+                print('Input your bet. Must be in [100; 500]')
+                print('Input 00 to go back!')
+                PlayerBet = input('[> ')
+                if PlayerBet == '00':
+                    ContinueFlag = -1
+                elif PlayerBet.isdigit():
+                    if int(PlayerBet) <= 500 and int(PlayerBet) >= 100:
+                        if int(PlayerBet) <= Hero.chGetGeneralParam('Gold'):
+                            PlayerBet = int(PlayerBet)
+                            Hero.chChangeGeneralParam('Gold', -PlayerBet)
+                            print('Bet confirmed')
+                            ContinueFlag = 1
+                        else:
+                            print('Not enough GOLD')
+                    else:
+                        print('Incorrect input!')
+                else:
+                    print('Use only digits!')
+            # ready to fight
+            if ContinueFlag == 1:
+                Enemy = EnemyGenerationByTrip('ArenaM', Hero.chGetGeneralParam('Level'))
+                WF, FF = HeroEnemyBattle(Hero, Enemy, 'Arena')
+                # Hero wins
+                if WF == 1:
+                    print(Hero.chGetGeneralParam('Name'), 'won!')
+                    # reward
+                    Hero.chChangeGeneralParam('Gold', PlayerBet * 2)
+                    # experience
+                    Hero.chChangeGeneralParam('Experience',
+                        Enemy.chGetGeneralParam('Level') // 10 + 1)
+                    if Hero.chGetGeneralParam('Experience') >= chHowMuchExpNeed(
+                        Hero.chGetGeneralParam('Level') + 1):
+                        NewLevel(Hero)
+                else:
+                    print(Enemy.chGetGeneralParam("Name"), 'won!')
+                # full restoration
+                Hero.chHealthRestore(1)
+        elif PlayerChoice == '3':
+            ContinueFlag = 0
+            # take a bet
+            while ContinueFlag == 0:
+                print('Input your bet. Must be 500 and more')
+                print('Input 00 to go back!')
+                PlayerBet = input('[> ')
+                if PlayerBet == '00':
+                    ContinueFlag = -1
+                elif PlayerBet.isdigit():
+                    if int(PlayerBet) >= 500:
+                        if int(PlayerBet) <= Hero.chGetGeneralParam('Gold'):
+                            PlayerBet = int(PlayerBet)
+                            Hero.chChangeGeneralParam('Gold', -PlayerBet)
+                            print('Bet confirmed')
+                            ContinueFlag = 1
+                        else:
+                            print('Not enough GOLD')
+                    else:
+                        print('Incorrect input!')
+                else:
+                    print('Use only digits!')
+            # ready to fight
+            if ContinueFlag == 1:
+                Enemy = EnemyGenerationByTrip('ArenaH', Hero.chGetGeneralParam('Level'))
+                WF, FF = HeroEnemyBattle(Hero, Enemy, 'Arena')
+                # Hero wins
+                if WF == 1:
+                    print(Hero.chGetGeneralParam('Name'), 'won!')
+                    # reward
+                    Hero.chChangeGeneralParam('Gold', PlayerBet * 2)
+                    # experience
+                    Hero.chChangeGeneralParam('Experience',
+                        Enemy.chGetGeneralParam('Level') // 10 + 1)
+                    if Hero.chGetGeneralParam('Experience') >= chHowMuchExpNeed(
+                        Hero.chGetGeneralParam('Level') + 1):
+                        NewLevel(Hero)
+                else:
+                    print(Enemy.chGetGeneralParam('Name'), 'won!')
+                # full restoration
+                Hero.chHealthRestore(1)
+        elif PlayerChoice != '0':
+            print('Impossible to choose', PlayerChoice)
+        print()
