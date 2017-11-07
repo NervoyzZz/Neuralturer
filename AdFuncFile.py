@@ -1340,6 +1340,7 @@ def PlaceMenu(Hero, Inventory, Place = 'City'):
                 PlaceMenu(Hero, Inventory, Place)
             elif CurPlaceOptions[int(userChoice)] in ('Menu'):
                 Hero, Inventory = GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]]()
+                PlaceMenu(Hero, Inventory, Place)
             else:
                 print('Not available yet :(')
         else:
