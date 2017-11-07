@@ -715,8 +715,10 @@ def MainMenu():
         and Exit from game)
     '''
     res = 0
-    print('~~~~~____Neuralturer____~~~~~')
-    print('Main Menu')
+    print()
+    print('~'*7 + '_'*7 + 'Neuralturer' + '_'*7 + '~'*7)
+    print()
+    print('_'*10 + 'Main Menu' + '_'*10)
     print('Input digit that corresponding option that you want to choose')
     print()
     canContinue = 0
@@ -990,9 +992,9 @@ def HeroInfoOption(Hero, Inventory):
                 print('Impossible to choose', pch)
         print()
 
-def TownPhysician(Hero, type = 'Main'):
+def TownPhysician(Hero, type = 'City'):
     ''' Option Visit Physician in some places.
-        In Main city you can pay for full health restoring and for BattleRestoring
+        In City you can pay for full health restoring and for BattleRestoring
         In one place, there will be only free full restoration
     '''
     PlayerChoice = '-1'
@@ -1161,10 +1163,12 @@ def CityArena(Hero):
     PlayerChoice = '-1'
     while PlayerChoice != '0':
         PlayerBet = 0
+        ContinueFlag = 0
         print('_____ARENA_____')
-        print('1. Easy fight (bets under 100 golds)')
-        print('2. Medium fight (bets in [100; 500] golds)')
-        print('3. Hard fight (bets above 500 golds)')
+        print('1. Fight with animal (bets under 50 golds)')
+        print('2. Easy fight (bets under 100 golds)')
+        print('3. Medium fight (bets in [100; 500] golds)')
+        print('4. Hard fight (bets above 500 golds)')
         # mb in future there will be Random Fight
         print('0. Leave')
         print()
@@ -1172,7 +1176,30 @@ def CityArena(Hero):
         # Easy fight
         PlayerChoice = input('You decided: [> ')
         if PlayerChoice == '1':
-            ContinueFlag = 0
+            # take a bet
+            while ContinueFlag == 0:
+                print('Input your bet. Must be in [1; 50]')
+                print('Input 00 to go back!')
+                PlayerBet = input('[> ')
+                if PlayerBet == '00':
+                    ContinueFlag = -1
+                elif PlayerBet.isdigit():
+                    if int(PlayerBet) <= 50 and int(PlayerBet) >= 1:
+                        if int(PlayerBet) <= Hero.chGetGeneralParam('Gold'):
+                            PlayerBet = int(PlayerBet)
+                            Hero.chChangeGeneralParam('Gold', -PlayerBet)
+                            print('Bet confirmed')
+                            ContinueFlag = 1
+                        else:
+                            print('Not enough GOLD')
+                    else:
+                        print('Incorrect input!')
+                else:
+                    print('Use only digits!')
+            # enemy generation
+            if ContinueFlag == 1:
+                Enemy = EnemyGenerationByTrip(constArenaAnimal)        
+        elif PlayerChoice == '2':
             # take a bet
             while ContinueFlag == 0:
                 print('Input your bet. Must be in [1; 100]')
@@ -1193,26 +1220,10 @@ def CityArena(Hero):
                         print('Incorrect input!')
                 else:
                     print('Use only digits!')
-            # ready to fight
+            # enemy generation
             if ContinueFlag == 1:
                 Enemy = EnemyGenerationByTrip('ArenaE', Hero.chGetGeneralParam('Level'))
-                WF, FF = HeroEnemyBattle(Hero, Enemy, 'Arena')
-                # Hero wins
-                if WF == 1:
-                    print(Hero.chGetGeneralParam('Name'), 'won!')
-                    # reward
-                    Hero.chChangeGeneralParam('Gold', PlayerBet * 2)
-                    # experience
-                    Hero.chChangeGeneralParam('Experience',
-                        Enemy.chGetGeneralParam('Level') // 10 + 1)
-                    if Hero.chGetGeneralParam('Experience') >= chHowMuchExpNeed(
-                        Hero.chGetGeneralParam('Level') + 1):
-                        NewLevel(Hero)
-                print(Enemy.chGetGeneralParam('Name'), 'won!')
-                # full restoration
-                Hero.chHealthRestore(1)
-        elif PlayerChoice == '2':
-            ContinueFlag = 0
+        elif PlayerChoice == '3':
             # take a bet
             while ContinueFlag == 0:
                 print('Input your bet. Must be in [100; 500]')
@@ -1233,27 +1244,10 @@ def CityArena(Hero):
                         print('Incorrect input!')
                 else:
                     print('Use only digits!')
-            # ready to fight
+            # enemy generation
             if ContinueFlag == 1:
                 Enemy = EnemyGenerationByTrip('ArenaM', Hero.chGetGeneralParam('Level'))
-                WF, FF = HeroEnemyBattle(Hero, Enemy, 'Arena')
-                # Hero wins
-                if WF == 1:
-                    print(Hero.chGetGeneralParam('Name'), 'won!')
-                    # reward
-                    Hero.chChangeGeneralParam('Gold', PlayerBet * 2)
-                    # experience
-                    Hero.chChangeGeneralParam('Experience',
-                        Enemy.chGetGeneralParam('Level') // 10 + 1)
-                    if Hero.chGetGeneralParam('Experience') >= chHowMuchExpNeed(
-                        Hero.chGetGeneralParam('Level') + 1):
-                        NewLevel(Hero)
-                else:
-                    print(Enemy.chGetGeneralParam("Name"), 'won!')
-                # full restoration
-                Hero.chHealthRestore(1)
-        elif PlayerChoice == '3':
-            ContinueFlag = 0
+        elif PlayerChoice == '4':
             # take a bet
             while ContinueFlag == 0:
                 print('Input your bet. Must be 500 and more')
@@ -1274,25 +1268,80 @@ def CityArena(Hero):
                         print('Incorrect input!')
                 else:
                     print('Use only digits!')
-            # ready to fight
+            # enemy generation
             if ContinueFlag == 1:
                 Enemy = EnemyGenerationByTrip('ArenaH', Hero.chGetGeneralParam('Level'))
-                WF, FF = HeroEnemyBattle(Hero, Enemy, 'Arena')
-                # Hero wins
-                if WF == 1:
-                    print(Hero.chGetGeneralParam('Name'), 'won!')
-                    # reward
-                    Hero.chChangeGeneralParam('Gold', PlayerBet * 2)
-                    # experience
-                    Hero.chChangeGeneralParam('Experience',
-                        Enemy.chGetGeneralParam('Level') // 10 + 1)
-                    if Hero.chGetGeneralParam('Experience') >= chHowMuchExpNeed(
-                        Hero.chGetGeneralParam('Level') + 1):
-                        NewLevel(Hero)
-                else:
-                    print(Enemy.chGetGeneralParam('Name'), 'won!')
-                # full restoration
-                Hero.chHealthRestore(1)
         elif PlayerChoice != '0':
             print('Impossible to choose', PlayerChoice)
+        # after all, let's show our battle
+        if ContinueFlag == 1:
+            WF, FF = HeroEnemyBattle(Hero, Enemy, 'Arena')
+            # Hero wins
+            if WF == 1:
+                print(Hero.chGetGeneralParam('Name'), 'won!')
+                # reward
+                Hero.chChangeGeneralParam('Gold', PlayerBet * 2)
+                # experience
+                Hero.chChangeGeneralParam('Experience',
+                    Enemy.chGetGeneralParam('Level') // 10 + 1)
+                if Hero.chGetGeneralParam('Experience') >= chHowMuchExpNeed(
+                        Hero.chGetGeneralParam('Level') + 1):
+                    NewLevel(Hero)
+            else:
+                print(Enemy.chGetGeneralParam('Name'), 'won!')
+            # full restoration
+            Hero.chHealthRestore(1)
         print()
+
+def PlaceMenu(Hero, Inventory, Place = 'City'):
+    ''' Function that show Menu of the Place (City and others). User can choose
+        what he want to do. Other place has it's own list of option. But there is
+        layout
+    '''
+    PlaceName = ''
+    # list of all option
+    # some options are always available
+    # that's my order of option:
+    GeneralPlaceOptions = {'Inspect': 0, 'Adventure': 0, 'Market': 0, 'Tavern': 0,
+                           'Arena': 0, 'Physician': 0, 'Character': 1, 'Save': 1,
+                           'Menu': 1}
+    GeneralPlaceFunctions = {'Market': CityMarket, 'Arena': CityArena,
+                             'Physician': TownPhysician, 'Character': HeroInfoOption,
+                             'Save': SaveGame, 'Menu': MainMenu}
+    CurPlaceOptions = {}
+    if Place == 'City':
+        PlaceName = 'City'
+        GeneralPlaceOptions['Market'] = 1
+        GeneralPlaceOptions['Arena'] = 1
+        GeneralPlaceOptions['Physician'] = 1
+    i = 1
+    for key in GeneralPlaceOptions.keys():
+        if GeneralPlaceOptions[key] == 1:
+            CurPlaceOptions[i] = key
+            i += 1
+    # Keys are in not my order :(
+    # It's work, but doesn't look like I want to
+    print('~~~~~____' + PlaceName + '____~~~~~')
+    for key in CurPlaceOptions.keys():
+        print(str(key) + '.', CurPlaceOptions[key])
+    print()
+    userChoice = input('You decided to [> ')
+    if userChoice.isdigit():
+        if int(userChoice) in CurPlaceOptions.keys():
+            if CurPlaceOptions[int(userChoice)] in ('Save', 'Market', 'Character'):
+                GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]](Hero, Inventory)
+                PlaceMenu(Hero, Inventory, Place)
+            elif CurPlaceOptions[int(userChoice)] in ('Arena'):
+                GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]](Hero)
+                PlaceMenu(Hero, Inventory, Place)
+            elif CurPlaceOptions[int(userChoice)] in ('Physician'):
+                GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]](Hero, PlaceName)
+                PlaceMenu(Hero, Inventory, Place)
+            elif CurPlaceOptions[int(userChoice)] in ('Menu'):
+                Hero, Inventory = GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]]()
+            else:
+                print('Not available yet :(')
+        else:
+            print('Impossible to choose', userChoice)
+    else:
+        print('Use only digits!')

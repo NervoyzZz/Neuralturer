@@ -35,6 +35,8 @@ constHardTrip = {'EasyEnemy': 5, 'AnimalEnemy': 5, 'MediumEnemy': 35,
                  'HardEnemy': 55}
 constVeryHardTrip = {'MediumEnemy': 15, 'HardEnemy': 80, 'UniqueEnemy': 5}
 constForestTrip = {'EasyEnemy': 10, 'AnimalEnemy': 90}
+# function for Arena
+constArenaAnimal = {'AnimalEnemy': 100}
 # Weapons and Armours
 constNoneWeapon = ({'Name': 'None', 'Description': '', 'Price': 0,
                     'Damage': (0, 0), 'AttackSpeed': 0}, )
