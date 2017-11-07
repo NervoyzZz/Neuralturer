@@ -601,6 +601,7 @@ def EnemyGenerationByTrip(TripType, HeroLvl = 25):
 
 def HeroNewLevel(Hero):
     ''' Function that makes all durty work to increase Hero lvl '''
+    print('NEW LEVEL!')
     # first we need to change current Hero Experience
     exp = (Hero.chGetGeneralParam('Experience') -
            chHowMuchExpNeed(Hero.chGetGeneralParam('Level') + 1))
@@ -1198,7 +1199,7 @@ def CityArena(Hero):
                     print('Use only digits!')
             # enemy generation
             if ContinueFlag == 1:
-                Enemy = EnemyGenerationByTrip(constArenaAnimal)        
+                Enemy = EnemyGenerationByTrip(constArenaAnimal)
         elif PlayerChoice == '2':
             # take a bet
             while ContinueFlag == 0:
@@ -1286,7 +1287,7 @@ def CityArena(Hero):
                     Enemy.chGetGeneralParam('Level') // 10 + 1)
                 if Hero.chGetGeneralParam('Experience') >= chHowMuchExpNeed(
                         Hero.chGetGeneralParam('Level') + 1):
-                    NewLevel(Hero)
+                    HeroNewLevel(Hero)
             else:
                 print(Enemy.chGetGeneralParam('Name'), 'won!')
             # full restoration
