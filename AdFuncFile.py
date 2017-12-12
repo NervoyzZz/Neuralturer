@@ -39,6 +39,8 @@ class clWeapon:
         self.__wpGeneralParam['AttackSpeed'] = AttackSpeed
     def __getitem__(self, key):
         return self.__wpGeneralParam[key]
+    def __setitem__(self, key, val):
+        self.__wpGeneralParam[key] = val
     def __eq__(self, other):
         res = 1
         for key in self.__wpGeneralParam.keys():
@@ -74,6 +76,8 @@ class clArmour:
         self.__arGeneralParam['SpeedBoost'] = SpeedBoost
     def __getitem__(self, key):
         return self.__arGeneralParam[key]
+    def __setitem__(self, key, val):
+        self.__arGeneralParam[key] = val
     def __eq__(self, other):
         res = 1
         for key in self.__arGeneralParam.keys():
@@ -187,8 +191,10 @@ class clCharacter:
             only for Enemy. Info about Enemy we will get with chGetGeneralParam
         chIncreaseCommonTrait(CommonTraitKey); Key is from chCommonTrait
         chIncreaseSpecialTrait(SpecialTraitKey); same
+        chSetCommonTrait(key, value); chSetSpecialTrait(key, value) => just set
         chRemoveWeapon(Weapon); chRemoveArmour(Armour)
         chAddWeapon(NewWeapon); chAddArmour(NewArmour)
+        chGetWeapon(); chGetArmour() => returns current equipment
         chHealthRestore(modifier); modifier = 0 => Restore value of BattleRestore
              otherwise full restoration
         chChangeGeneralParam(Key, Value); Key from chGeneralParam
@@ -381,16 +387,21 @@ class clCharacter:
         self.__chGeneralParam['AttackSpeed'] -= OldWeapon['AttackSpeed']
         self.__chWeapon = clWeapon()
 
-    def chAddWeapon(self, NewWeapon):
+    def chAddWeapon(self, NewWeapon, SetFlag = 0):
         ''' This method adds NewWeapon to Character
             First, we should remove weapon from character and next we can
             change Character's params and set Weapon to NewWeapon
         '''
         self.chRemoveWeapon(self.__chWeapon)
         self.__chWeapon = NewWeapon
-        self.__chGeneralParam['MinDamage'] += NewWeapon['MinDamage']
-        self.__chGeneralParam['MaxDamage'] += NewWeapon['MaxDamage']
-        self.__chGeneralParam['AttackSpeed'] += NewWeapon['AttackSpeed']
+        if not SetFlag:
+            self.__chGeneralParam['MinDamage'] += NewWeapon['MinDamage']
+            self.__chGeneralParam['MaxDamage'] += NewWeapon['MaxDamage']
+            self.__chGeneralParam['AttackSpeed'] += NewWeapon['AttackSpeed']
+
+    def chGetWeapon(self):
+        ''' This method return Character current Weapon '''
+        return self.__chWeapon
 
     def chRemoveArmour(self, OldArmour):
         ''' This method removes OldArmour from Character
@@ -400,15 +411,20 @@ class clCharacter:
         self.__chGeneralParam['AttackSpeed'] -= OldArmour['SpeedBoost']
         self.__chArmour = clArmour()
 
-    def chAddArmour(self, NewArmour):
+    def chAddArmour(self, NewArmour, SetFlag = 0):
         ''' This method adds NewArmour to Character
             First, we should remove weapon from character and next we can
             change Character's params and set Armour to NewArmour
         '''
         self.chRemoveArmour(self.__chArmour)
         self.__chArmour = NewArmour
-        self.__chGeneralParam['MHealth'] += NewArmour['HealthBoost']
-        self.__chGeneralParam['AttackSpeed'] += NewArmour['SpeedBoost']
+        if not SetFlag:
+            self.__chGeneralParam['MHealth'] += NewArmour['HealthBoost']
+            self.__chGeneralParam['AttackSpeed'] += NewArmour['SpeedBoost']
+
+    def chGetArmour(self):
+        ''' This method return Character current Armour '''
+        return self.__chArmour
 
     def chHealthRestore(self, modifier = 0):
         ''' Restore character health.
@@ -452,12 +468,26 @@ class clCharacter:
         else:
             return -1
 
+    def chSetCommonTrait(self, Key, value = 0):
+        ''' Set chCommonTrait[Key] to value '''
+        if Key in self.__chCommonTrait.keys():
+            self.__chCommonTrait[Key] = value
+        else:
+            print('Enable to set', Key)
+
     def chGetSpecialTrait(self, Key):
         ''' return SpecialTrait by Key '''
         if Key in self.__chSpecialTrait.keys():
             return self.__chSpecialTrait[Key]
         else:
             return -1
+
+    def chSetSpecialTrait(self, Key, value = 0):
+        ''' Set chSpecialTrait[Key] to value '''
+        if Key in self.__chSpecialTrait.keys():
+            self.__chSpecialTrait[Key] = value
+        else:
+            print('Enable to set', Key)
 
     def chDoHit(self):
         ''' Let's smash our enemies!
@@ -497,9 +527,9 @@ class clCharacter:
 def EnemyGenerationByTrip(TripType, HeroLvl = 25):
     ''' Function that return Enemy. Enemy is choosen by TripType (look at
         AdConstFile). It can be constEasyTrip, constMediumTrip, constHardTrip,
-        constVeryHardTrip and constForestTrip. It also can be equal ArenaE,
-        ArenaM, ArenaH for difficult of Arena. First, choose EnemyType,
-        then create Enemy and return it.
+        constVeryHardTrip, constForestTrip, constArenaAnimal. It also can be
+        equal ArenaE, ArenaM, ArenaH for difficult of Arena. First, choose
+        EnemyType, then create Enemy and return it.
     '''
     # So let's choose EnemyType:
     resEnemy = -1
@@ -668,7 +698,6 @@ def NewGame():
         Return (clCharacter, Inventory), where
         Inventory = (list of Weapon, list of Armour)
     '''
-    res = ()
     Hero = clCharacter()
     HeroWeapons = []
     HeroArmours = []
@@ -690,9 +719,7 @@ def NewGame():
     Hero.chSetGeneralParam('CHealth', Hero.chGetGeneralParam('MHealth'))
     Hero.chSetGeneralParam('PotionSlots', [1, 1])
     res = (Hero, (HeroWeapons, HeroArmours))
-    f = open(constDataFileName, 'bw')
-    dump(res, f)
-    f.close()
+    SaveGame(res[0], res[1], 0)
     return res
 
 def ContinueGame():
@@ -702,9 +729,35 @@ def ContinueGame():
         call ContinueGame
     '''
     f = open(constDataFileName, 'br')
-    res = load(f)
+    Hero, Inv = load(f)
     f.close()
-    return res
+    resH = clCharacter()
+    resI = [[],[]]
+    for keys in constGeneralParams:
+        resH.chSetGeneralParam(keys, Hero[0][keys])
+    for keys in constCommonTraits:
+        resH.chSetCommonTrait(keys, Hero[3][keys])
+    for keys in constSpecialTraits:
+        resH.chSetSpecialTrait(keys, Hero[4][keys])
+    wep = clWeapon()
+    arm = clArmour()
+    for keys in constWeaponParams:
+        wep[keys] = Hero[1][keys]
+    for keys in constArmourParams:
+        arm[keys] = Hero[2][keys]
+    resH.chAddWeapon(wep, 1)
+    resH.chAddArmour(arm, 1)
+    for weps in Inv[0]:
+        w = clWeapon()
+        for keys in constWeaponParams:
+            w[keys] = weps[keys]
+        resI[0].append(w)
+    for arms in Inv[1]:
+        a = clArmour()
+        for keys in constArmourParams:
+            a[keys] = arms[keys]
+        resI[1].append(a)
+    return (resH, resI)
 
 def AboutGame():
     ''' Just info about the game. It will be shown if user choose About in MainMenu '''
@@ -745,15 +798,45 @@ def MainMenu():
         res = MainMenu()
     return res
 
-def SaveGame(Character, Inventory):
+def SaveGame(Character, Inventory, ShowInfoFlag = 1):
     ''' Function that save Game Data to constDataFileName file.
         Be sure that Inventory is (List of Weapon, List of Armour)
     '''
-    res = (Character, Inventory)
+    hgp = {}                        # Hero GeneralParam
+    hw = {}                         # Hero Weapon
+    ha = {}                         # Hero Armour
+    hct = {}                        # Hero CommonTrait
+    hst = {}                        # Hero SpecialTrait
+    wep = Character.chGetWeapon()   # Hero current Weapon
+    arm = Character.chGetArmour()   # Hero current Armour
+    invw = []                       # Weapons from Inventory
+    inva = []                       # Armours from Inventory
+    for keys in constGeneralParams:
+        hgp[keys] = Character.chGetGeneralParam(keys)
+    for keys in constCommonTraits:
+        hct[keys] = Character.chGetCommonTrait(keys)
+    for keys in constSpecialTraits:
+        hst[keys] = Character.chGetSpecialTrait(keys)
+    for keys in constWeaponParams:
+        hw[keys] = wep[keys]
+    for keys in constArmourParams:
+        ha[keys] = arm[keys]
+    for weps in Inventory[0]:
+        w = {}
+        for keys in constWeaponParams:
+            w[keys] = weps[keys]
+        invw.append(w)
+    for arms in Inventory[1]:
+        a = {}
+        for keys in constArmourParams:
+            a[keys] = arms[keys]
+        inva.append(a)
+    res = ((hgp, hw, ha, hct, hst), (invw, inva))
     f = open(constDataFileName, 'bw')
     dump(res, f)
     f.close()
-    print('Successfully saved!')
+    if ShowInfoFlag:
+        print('Successfully saved!')
 
 def CityMarket(Hero, Inventory):
     ''' Function that imitate market in main city. On market player can buy

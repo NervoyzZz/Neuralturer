@@ -27,6 +27,16 @@ constCommonTraits = ('Vitality', 'Strength', 'Luck', 'Agility', 'Accuracy',
 # Special traits tuple
 constSpecialTraits = ('Undead', 'Carrier', 'QuickHand', 'OnePunch', 'Physician',
                       'Trader')
+# General param tuple
+constGeneralParams = ('Name', 'Description', 'CHealth', 'MHealth', 'MinDamage',
+                      'MaxDamage', 'MaxPotion', 'PotionSlots', 'PotionRestore',
+                      'Gold', 'Level', 'Experience', 'HitChance', 'AttackSpeed',
+                      'FindChance', 'KnowChance', 'FleeChance', 'BattleRestore')
+# Weapons params
+constWeaponParams = ('Name', 'Description', 'Price', 'MinDamage', 'MaxDamage',
+                     'AttackSpeed')
+# Armours params
+constArmourParams = ('Name', 'Description', 'Price', 'HealthBoost', 'SpeedBoost')
 # Random functions for trips
 constEasyTrip = {'EasyEnemy': 80, 'AnimalEnemy': 15, 'MediumEnemy': 5 }
 constMediumTrip = {'EasyEnemy': 15, 'AnimalEnemy': 10, 'MediumEnemy': 70,
