@@ -184,60 +184,60 @@ constClothesArmour = ({'Name': 'Ragged clothes', 'Description': """Old ragged st
                        'Price': 50, 'HealthBoost': 0, 'SpeedBoost': 0},
 
                       {'Name': 'Common clothes', 'Description': """Common clothet that can be
-                       found in every house.""", 'Price': 100, 'HealthBoost': 0, 'SpeedBoost': 5},
+                       found in every house.""", 'Price': 939, 'HealthBoost': 0, 'SpeedBoost': 15},
 
                       {'Name': 'Hunter clothes', 'Description': """Good quality clothes.
-                       good choice to go hunting.""", 'Price': 200, 'HealthBoost': 0,
-                       'SpeedBoost': 10},
+                       good choice to go hunting.""", 'Price': 2350, 'HealthBoost': 0,
+                       'SpeedBoost': 30},
 
                       {'Name': 'Thiefs clothes', 'Description': """Perfect weightless clothes
                        that doesn't constrain movement. Want be faster than shadow?""",
-                       'Price': 500, 'HealthBoost': 0, 'SpeedBoost': 15},
+                       'Price': 6264, 'HealthBoost': 0, 'SpeedBoost': 55},
 
                       {'Name': 'Vampire robe', 'Description': """Cold black robe that smells
                        like death. Some days ago a Vampire has this clothes. Vampires are
-                       long-lived creature that moves fast, bites hard.""", 'Price': 1000,
-                       'HealthBoost': 0, 'SpeedBoost': 25})
+                       long-lived creature that moves fast, bites hard.""", 'Price': 9979,
+                       'HealthBoost': 0, 'SpeedBoost': 70})
 
 constLightArmour = ({'Name': 'Hide armour', 'Description': """Light armour, that doesn't offer
-                     much protection, but you will fell better with it.""", 'Price': 150,
-                     'HealthBoost': 5, 'SpeedBoost': 0},
+                     much protection, but you will fell better with it.""", 'Price': 1095,
+                     'HealthBoost': 10, 'SpeedBoost': 0},
 
                     {'Name': 'Studded armour', 'Description': """Light armour, that can offer
-                     little protection.""", 'Price': 350, 'HealthBoost': 10, 'SpeedBoost': 0},
+                     little protection.""", 'Price': 2662, 'HealthBoost': 20, 'SpeedBoost': 0},
 
                     {'Name': 'Scaled armour', 'Description': """Light armour, that can offer
-                     little protection and cool look.""", 'Price': 500, 'HealthBoost': 15,
+                     little protection and cool look.""", 'Price': 6249, 'HealthBoost': 35,
                      'SpeedBoost': 0},
 
                     {'Name': 'Leather armour', 'Description': """Good armour. It's light,
-                     and it offer good protection.""", 'Price': 700, 'HealthBoost': 20,
+                     and it offer good protection.""", 'Price': 11506, 'HealthBoost': 49,
                      'SpeedBoost': 0},
 
                     {'Name': 'Fur armour', 'Description': """Brutal light armour that presents
-                     you as strong man that can punish his foes.""", 'Price': 750,
-                     'HealthBoost': 20, 'SpeedBoost': 0})
+                     you as strong man that can punish his foes.""", 'Price': 11973,
+                     'HealthBoost': 50, 'SpeedBoost': 0})
 
 constHeavyArmour = ({'Name': 'Iron armour', 'Description': """Cheap heavy armour. It's really
-                     heavy but it offers nice protection.""", 'Price': 500, 'HealthBoost': 25,
-                     'SpeedBoost': -10},
+                     heavy but it offers nice protection.""", 'Price': 14587, 'HealthBoost': 70,
+                     'SpeedBoost': -20},
 
                     {'Name': 'Steel armour', 'Description': """Good heavy armour. It's really
-                     heavy but it offers good protection""", 'Price': 750, 'HealthBoost': 30,
-                     'SpeedBoost': -15},
+                     heavy but it offers good protection""", 'Price': 15994, 'HealthBoost': 90,
+                     'SpeedBoost': -40},
 
                     {'Name': 'Mail armour', 'Description': """Shirt that made with thousands
-                     iron rings. It's heavy and it offers real protection.""", 'Price': 1000,
-                     'HealthBoost': 30, 'SpeedBoost': -10},
+                     iron rings. It's heavy and it offers real protection.""", 'Price': 21785,
+                     'HealthBoost': 85, 'SpeedBoost': -25},
 
                     {'Name': 'Lamellar armour', 'Description': """Heavy armour that made with
                      two layers. First is leather armor, second is made with a lot of steel
-                     plates. This armour provides a great protection.""", 'Price': 1500,
-                     'HealthBoost': 40, 'SpeedBoost': -25},
+                     plates. This armour provides a great protection.""", 'Price': 34682,
+                     'HealthBoost': 120, 'SpeedBoost': -50},
 
                     {'Name': 'Plate armour', 'Description': """Piece of metal. Who can pierce
-                     it? Yeah, but it's weight - brrrr.""", 'Price': 2500, 'HealthBoost': 55,
-                     'SpeedBoost': -40})
+                     it? Yeah, but it's weight - brrrr.""", 'Price': 75726, 'HealthBoost': 170,
+                     'SpeedBoost': -80})
 
 constAnyArmour = (constClothesArmour, constLightArmour, constHeavyArmour)
 

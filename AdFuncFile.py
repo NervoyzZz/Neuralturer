@@ -917,6 +917,7 @@ def CityMarket(Hero, Inventory):
                             weapstr = weapstr[0: -1]
                             print('You got it!')
                             print('And now you have', Hero.chGetGeneralParam('Gold'), 'golds')
+                            SaveGame(Hero, Inventory, 0)
                     else:
                         print('Not enough GOLD!')
                         print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
@@ -959,6 +960,7 @@ def CityMarket(Hero, Inventory):
                             print('And now you have', Hero.chGetGeneralParam('Gold'), 'golds')
                             if FullHealthFlag:
                                 Hero.chSetGeneralParam('CHealth', Hero.chGetGeneralParam('MHealth'))
+                            SaveGame(Hero, Inventory, 0)
                     else:
                         print('Not enough GOLD!')
                         print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
@@ -995,6 +997,7 @@ def CityMarket(Hero, Inventory):
                             Hero.chSetGeneralParam('PotionSlots', pot)
                             print('You got it!')
                             print('And now you have', Hero.chGetGeneralParam('Gold'), 'golds')
+                            SaveGame(Hero, Inventory, 0)
                         else:
                             print('No free space!')
                     else:
@@ -1076,7 +1079,7 @@ def HeroInfoOption(Hero, Inventory):
                 print('Impossible to choose', pch)
         print()
 
-def TownPhysician(Hero, type = 'City'):
+def TownPhysician(Hero, Inventory, type = 'City'):
     ''' Option Visit Physician in some places.
         In City you can pay for full health restoring and for BattleRestoring
         In one place, there will be only free full restoration
@@ -1107,6 +1110,7 @@ def TownPhysician(Hero, type = 'City'):
                     print('Now you have', Hero.chGetGeneralParam('Gold'), 'golds')
                     print('And your health:', str(Hero.chGetGeneralParam('CHealth')) + '/' +
                           str(Hero.chGetGeneralParam('MHealth')))
+                    SaveGame(Hero, Inventory, 0)
                 else:
                     print('Not enough GOLD!')
                     print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
@@ -1120,6 +1124,7 @@ def TownPhysician(Hero, type = 'City'):
                     print('Now you have', Hero.chGetGeneralParam('Gold'), 'golds')
                     print('And your health:', str(Hero.chGetGeneralParam('CHealth')) + '/' +
                           str(Hero.chGetGeneralParam('MHealth')))
+                    SaveGame(Hero, Inventory, 0)
                 else:
                     print('Not enough GOLD!')
                     print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
@@ -1238,7 +1243,7 @@ def HeroEnemyBattle(Hero, Enemy, type):
             WinFlag = 1
     return (WinFlag, FleeFlag)
 
-def CityArena(Hero):
+def CityArena(Hero, Inventory):
     ''' function that makes it possible to participate in competition on the Arena
         Player makes choice, take bet and then his Hero fights. If Hero wins,
         then he gets bet*2, experience from bitten Enemy, NewLevel, if he has enough
@@ -1375,6 +1380,7 @@ def CityArena(Hero):
                 print(Enemy.chGetGeneralParam('Name'), 'won!')
             # full restoration
             Hero.chHealthRestore(1)
+            SaveGame(Hero, Inventory, 0)
         print()
 
 def PlaceMenu(Hero, Inventory, Place = 'City'):
@@ -1412,14 +1418,8 @@ def PlaceMenu(Hero, Inventory, Place = 'City'):
     userChoice = input('You decided to [> ')
     if userChoice.isdigit():
         if int(userChoice) in CurPlaceOptions.keys():
-            if CurPlaceOptions[int(userChoice)] in ('Save', 'Market', 'Character'):
+            if CurPlaceOptions[int(userChoice)] in ('Save', 'Market', 'Character', 'Arena', 'Physician'):
                 GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]](Hero, Inventory)
-                PlaceMenu(Hero, Inventory, Place)
-            elif CurPlaceOptions[int(userChoice)] in ('Arena'):
-                GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]](Hero)
-                PlaceMenu(Hero, Inventory, Place)
-            elif CurPlaceOptions[int(userChoice)] in ('Physician'):
-                GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]](Hero, PlaceName)
                 PlaceMenu(Hero, Inventory, Place)
             elif CurPlaceOptions[int(userChoice)] in ('Menu'):
                 Hero, Inventory = GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]]()
