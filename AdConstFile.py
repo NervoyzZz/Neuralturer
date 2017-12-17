@@ -45,8 +45,68 @@ constHardTrip = {'EasyEnemy': 5, 'AnimalEnemy': 5, 'MediumEnemy': 35,
                  'HardEnemy': 55}
 constVeryHardTrip = {'MediumEnemy': 15, 'HardEnemy': 80, 'UniqueEnemy': 5}
 constForestTrip = {'EasyEnemy': 10, 'AnimalEnemy': 90}
-# function for Arena
 constArenaAnimal = {'AnimalEnemy': 100}
+# random functions for bosses
+constEasyBoss = {'EasyEnemy': 30, 'MediumEnemy': 70}
+constMediumBoss = {'MediumEnemy': 20, 'HardEnemy': 80}
+constHardBoss = {'HardEnemy': 40, 'UniqueEnemy': 60}
+constVeryHardBoss = {'HardEnemy': 10, 'UniqueEnemy': 90}
+# Names of places
+constCityName = 'City'
+constFortName = 'Fort'
+constTowerName = 'Watch Tower'
+constHofName = 'Druid Grove'
+constAbandonedFortName = 'Abandoned Fort'
+constDenName = 'Robber\'s Den'
+constCoastalCaveName = 'Coastal Cave'
+constDragonIslandName = 'It\'s secret for now ;)'
+# length of trips. To place {From: HowLong}. from = const*Name
+constToCityLength = {constFortName: 5, constTowerName: 10, constHofName:5,
+                     constAbandonedFortName: 15, constDenName: 25}
+constToFortLength = {constCityName: constToCityLength[constFortName],
+                     constAbandonedFortName: 15}
+constToTowerLength = {constCityName: constToCityLength[constTowerName],
+                      constCoastalCaveName: 40}
+constToHofLength = {constCityName: constToCityLength[constHofName]}
+constToAbandonedFortLength = {constCityName: constToCityLength[constAbandonedFortName],
+                              constFortName: constToFortLength[constAbandonedFortName]}
+constToDenLength = {constCityName: constToCityLength[constDenName]}
+constToCoastalCaveLength = {constTowerName: constToTowerLength[constCoastalCaveName]}
+# types of trips. To place {From: TripType}
+constToCityTrip = {constFortName: constEasyTrip, constTowerName: constEasyTrip,
+                   constHofName: constForestTrip, constAbandonedFortName: constMediumTrip,
+                   constDenName: constMediumTrip}
+constToFortTrip = {constCityName: constToCityTrip[constFortName],
+                   constAbandonedFortName: constMediumTrip}
+constToTowerTrip = {constCityName: constToCityTrip[constTowerName],
+                    constCoastalCaveName: constVeryHardTrip}
+constToHofTrip = {constCityName: constToCityTrip[constHofName]}
+constToAbandonedFortTrip = {constCityName: constToCityTrip[constAbandonedFortName],
+                            constFortName: constToFortTrip[constAbandonedFortName]}
+constToDenTrip = {constCityName: constToCityTrip[constDenName]}
+constToCoastalCaveTrip = {constTowerName: constToTowerTrip[constCoastalCaveName]}
+# Places INFO {Name, TripLength, IsSafe, TripType, EnemyChance, BossType}
+# place name, how far is place, is place safe? trip type, chance to meet enemy,
+# boss type in place (if need)
+constCityPlace = {'Name': constCityName, 'TripLength': constToCityLength,
+                  'IsSafe': True, 'TripType': constToCityTrip, 'EnemyChance': 100}
+constFortPlace = {'Name': constFortName, 'TripLength': constToFortLength,
+                  'IsSafe': True, 'TripType': constToFortTrip, 'EnemyChance': 100}
+constTowerPlace = {'Name': constTowerName, 'TripLength': constToTowerLength,
+                   'IsSafe': True, 'TripType': constToTowerTrip,'EnemyChance': 100}
+constHofPlace = {'Name': constHofName, 'TripLength': constToHofLength,
+                 'IsSafe': True, 'TripType': constToHofTrip,'EnemyChance': 100}
+constAbandonedFortPlace = {'Name': constAbandonedFortName,
+                           'TripLength': constToAbandonedFortLength, 'IsSafe': False,
+                           'TripType': constToAbandonedFortTrip,
+                           'EnemyChance': 65, 'BossType': constMediumBoss}
+constDenPlace = {'Name': constDenName, 'TripLength': constToDenLength,
+                 'IsSafe': False, 'TripType': constToDenTrip, 'EnemyChance': 50,
+                 'BossType': constHardBoss}
+constCoastalCavePlace = {'Name': constCoastalCaveName,
+                         'TripLength': constToCoastalCaveLength,
+                         'IsSafe': False, 'TripType': constToCoastalCaveTrip,
+                         'EnemyChance': 70, 'BossType': constVeryHardBoss}
 # Weapons and Armours
 constNoneWeapon = ({'Name': 'None', 'Description': '', 'Price': 0,
                     'Damage': (0, 0), 'AttackSpeed': 0}, )

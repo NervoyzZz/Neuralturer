@@ -1079,14 +1079,18 @@ def HeroInfoOption(Hero, Inventory):
                 print('Impossible to choose', pch)
         print()
 
-def TownPhysician(Hero, Inventory, type = 'City'):
+def TownPhysician(Hero, Inventory, type = constCityName):
     ''' Option Visit Physician in some places.
-        In City you can pay for full health restoring and for BattleRestoring
+        In constCityName you can pay for full health restoring and for BattleRestoring
         In one place, there will be only free full restoration
     '''
     PlayerChoice = '-1'
-    fulprice = 100
-    poulticeprice = 30
+    if type == constCityName:
+        fulprice = 100
+        poulticeprice = 30
+    else:
+        fulprice = 0
+        poulticeprice = 0
     while PlayerChoice != '3':
         print('_____PHYSICIAN_____')
         # there will be if for unique place where it's free to full restoration
@@ -1383,7 +1387,50 @@ def CityArena(Hero, Inventory):
             SaveGame(Hero, Inventory, 0)
         print()
 
-def PlaceMenu(Hero, Inventory, Place = 'City'):
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# NOT READY
+def TripFromToPlace(Hero, Inventory, FromPlace, ToPlace):
+    ''' Function of Character adventure. Hero go from FromPlace to ToPlace,
+        fiight with enemies, can return, when he arrives, he can clean place,
+        and than visit it and do his deals. If Place IsSafe, there is no need
+        to clear it
+    '''
+    # how much enemies Hero meets
+    enemy_count = 0
+    continue_flag = True
+    Place = FromPlace
+    # trip length from FromPlace to ToPlace
+    i = 0
+    while i < (ToPlace['TripLength'][FromPlace['Name']]) and continue_flag:
+        # can meet Enemy?
+        if WhatWillHappen({1: ToPlace['EnemyChance']}):
+            enemy_count += 1
+            Enemy = EnemyGenerationByTrip(ToPlace['TripType'][FromPlace['Name']])
+            # Fight
+            WinFlag, FleeFlag =  HeroEnemyBattle(Hero, Enemy, 'Field')
+            Hero.chHealthRestore()
+            # Hero Wins
+            if WinFlag:
+                if not FleeFlag:
+                    # reward for Hero
+                    pass
+                # ask for continue
+            # lose
+            else:
+                # take hero's money
+                # and go to FromPlace
+                pass
+        i += 1
+    if i == ToPlace['TripLength'][FromPlace['Name']]:
+        # Hero arrived
+        if ToPlace['IsSafe']:
+            Place = ToPlace
+        else:
+            # Hero can clear place or go home
+            pass
+    PlaceMenu(Hero, Inventory, Place)
+
+def PlaceMenu(Hero, Inventory, Place = constCityName):
     ''' Function that show Menu of the Place (City and others). User can choose
         what he want to do. Other place has it's own list of option. But there is
         layout
@@ -1399,8 +1446,8 @@ def PlaceMenu(Hero, Inventory, Place = 'City'):
                              'Physician': TownPhysician, 'Character': HeroInfoOption,
                              'Save': SaveGame, 'Menu': MainMenu}
     CurPlaceOptions = {}
-    if Place == 'City':
-        PlaceName = 'City'
+    if Place == constCityName:
+        PlaceName = constCityName
         GeneralPlaceOptions['Market'] = 1
         GeneralPlaceOptions['Arena'] = 1
         GeneralPlaceOptions['Physician'] = 1
