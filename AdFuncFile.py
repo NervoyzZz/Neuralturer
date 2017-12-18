@@ -698,6 +698,7 @@ def NewGame():
         Return (clCharacter, Inventory), where
         Inventory = (list of Weapon, list of Armour)
     '''
+    Params = {'Place': constCityPlace}
     Hero = clCharacter()
     HeroWeapons = []
     HeroArmours = []
@@ -718,8 +719,8 @@ def NewGame():
     HeroNewLevel(Hero)
     Hero.chSetGeneralParam('CHealth', Hero.chGetGeneralParam('MHealth'))
     Hero.chSetGeneralParam('PotionSlots', [1, 1])
-    res = (Hero, (HeroWeapons, HeroArmours))
-    SaveGame(res[0], res[1], 0)
+    res = (Hero, (HeroWeapons, HeroArmours), Params)
+    SaveGame(res[0], res[1], res[2], 0)
     return res
 
 def ContinueGame():
@@ -729,7 +730,7 @@ def ContinueGame():
         call ContinueGame
     '''
     f = open(constDataFileName, 'br')
-    Hero, Inv = load(f)
+    Hero, Inv, Params = load(f)
     f.close()
     resH = clCharacter()
     resI = [[],[]]
@@ -757,7 +758,7 @@ def ContinueGame():
         for keys in constArmourParams:
             a[keys] = arms[keys]
         resI[1].append(a)
-    return (resH, resI)
+    return (resH, resI, Params)
 
 def AboutGame():
     ''' Just info about the game. It will be shown if user choose About in MainMenu '''
@@ -798,9 +799,10 @@ def MainMenu():
         res = MainMenu()
     return res
 
-def SaveGame(Character, Inventory, ShowInfoFlag = 1):
+def SaveGame(Character, Inventory, Params, ShowInfoFlag = 1):
     ''' Function that save Game Data to constDataFileName file.
         Be sure that Inventory is (List of Weapon, List of Armour)
+        Params is dictionary with Params and their values
     '''
     hgp = {}                        # Hero GeneralParam
     hw = {}                         # Hero Weapon
@@ -831,14 +833,14 @@ def SaveGame(Character, Inventory, ShowInfoFlag = 1):
         for keys in constArmourParams:
             a[keys] = arms[keys]
         inva.append(a)
-    res = ((hgp, hw, ha, hct, hst), (invw, inva))
+    res = ((hgp, hw, ha, hct, hst), (invw, inva), Params)
     f = open(constDataFileName, 'bw')
     dump(res, f)
     f.close()
     if ShowInfoFlag:
         print('Successfully saved!')
 
-def CityMarket(Hero, Inventory):
+def CityMarket(Hero, Inventory, Params):
     ''' Function that imitate market in main city. On market player can buy
         weapons, armour and potions. Merchants have one weapon and armour for
         each type.
@@ -917,7 +919,7 @@ def CityMarket(Hero, Inventory):
                             weapstr = weapstr[0: -1]
                             print('You got it!')
                             print('And now you have', Hero.chGetGeneralParam('Gold'), 'golds')
-                            SaveGame(Hero, Inventory, 0)
+                            SaveGame(Hero, Inventory, Params, 0)
                     else:
                         print('Not enough GOLD!')
                         print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
@@ -960,7 +962,7 @@ def CityMarket(Hero, Inventory):
                             print('And now you have', Hero.chGetGeneralParam('Gold'), 'golds')
                             if FullHealthFlag:
                                 Hero.chSetGeneralParam('CHealth', Hero.chGetGeneralParam('MHealth'))
-                            SaveGame(Hero, Inventory, 0)
+                            SaveGame(Hero, Inventory, Params, 0)
                     else:
                         print('Not enough GOLD!')
                         print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
@@ -997,7 +999,7 @@ def CityMarket(Hero, Inventory):
                             Hero.chSetGeneralParam('PotionSlots', pot)
                             print('You got it!')
                             print('And now you have', Hero.chGetGeneralParam('Gold'), 'golds')
-                            SaveGame(Hero, Inventory, 0)
+                            SaveGame(Hero, Inventory, Params, 0)
                         else:
                             print('No free space!')
                     else:
@@ -1007,7 +1009,7 @@ def CityMarket(Hero, Inventory):
                 print('Imposible to choose', pch)
             print()
 
-def HeroInfoOption(Hero, Inventory):
+def HeroInfoOption(Hero, Inventory, Params):
     ''' This function can show Hero information as chShowInfo and show Inventory.
         Player can equip item from Inventory
     '''
@@ -1079,7 +1081,7 @@ def HeroInfoOption(Hero, Inventory):
                 print('Impossible to choose', pch)
         print()
 
-def TownPhysician(Hero, Inventory, type = constCityName):
+def TownPhysician(Hero, Inventory, Params, type = constCityName):
     ''' Option Visit Physician in some places.
         In constCityName you can pay for full health restoring and for BattleRestoring
         In one place, there will be only free full restoration
@@ -1114,7 +1116,7 @@ def TownPhysician(Hero, Inventory, type = constCityName):
                     print('Now you have', Hero.chGetGeneralParam('Gold'), 'golds')
                     print('And your health:', str(Hero.chGetGeneralParam('CHealth')) + '/' +
                           str(Hero.chGetGeneralParam('MHealth')))
-                    SaveGame(Hero, Inventory, 0)
+                    SaveGame(Hero, Inventory, Params, 0)
                 else:
                     print('Not enough GOLD!')
                     print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
@@ -1128,7 +1130,7 @@ def TownPhysician(Hero, Inventory, type = constCityName):
                     print('Now you have', Hero.chGetGeneralParam('Gold'), 'golds')
                     print('And your health:', str(Hero.chGetGeneralParam('CHealth')) + '/' +
                           str(Hero.chGetGeneralParam('MHealth')))
-                    SaveGame(Hero, Inventory, 0)
+                    SaveGame(Hero, Inventory, Params, 0)
                 else:
                     print('Not enough GOLD!')
                     print('You have only', Hero.chGetGeneralParam('Gold'), 'golds')
@@ -1198,7 +1200,7 @@ def HeroEnemyBattle(Hero, Enemy, type):
                     WhatWillHappen({1: attacker.chGetGeneralParam('FleeChance')})):
                     if FleeFlag == 0:
                         FleeFlag = (1 if attacker == Hero else 2)
-                        print(attacker.chGetGeneralParam('Name') + 'decided to flee.')
+                        print(attacker.chGetGeneralParam('Name') + ' decided to flee.')
             # now let's drink some potions
             DamagePotionFlag = 0
             if (defender.chGetGeneralParam('CHealth') < defender.chGetGeneralParam('MHealth') and
@@ -1247,7 +1249,7 @@ def HeroEnemyBattle(Hero, Enemy, type):
             WinFlag = 1
     return (WinFlag, FleeFlag)
 
-def CityArena(Hero, Inventory):
+def CityArena(Hero, Inventory, Params):
     ''' function that makes it possible to participate in competition on the Arena
         Player makes choice, take bet and then his Hero fights. If Hero wins,
         then he gets bet*2, experience from bitten Enemy, NewLevel, if he has enough
@@ -1384,21 +1386,26 @@ def CityArena(Hero, Inventory):
                 print(Enemy.chGetGeneralParam('Name'), 'won!')
             # full restoration
             Hero.chHealthRestore(1)
-            SaveGame(Hero, Inventory, 0)
+            SaveGame(Hero, Inventory, Params, 0)
         print()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # NOT READY
-def TripFromToPlace(Hero, Inventory, FromPlace, ToPlace):
+def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
     ''' Function of Character adventure. Hero go from FromPlace to ToPlace,
-        fiight with enemies, can return, when he arrives, he can clean place,
+        fight with enemies, can return, when he arrives, he can clean place,
         and than visit it and do his deals. If Place IsSafe, there is no need
         to clear it
     '''
     # how much enemies Hero meets
     enemy_count = 0
+    # continue trip or not
     continue_flag = True
+    # hero award
+    hero_award = 0
+    # where will be Hero after trip
     Place = FromPlace
+    Params['Place'] = Place
     # trip length from FromPlace to ToPlace
     i = 0
     while i < (ToPlace['TripLength'][FromPlace['Name']]) and continue_flag:
@@ -1406,36 +1413,147 @@ def TripFromToPlace(Hero, Inventory, FromPlace, ToPlace):
         if WhatWillHappen({1: ToPlace['EnemyChance']}):
             enemy_count += 1
             Enemy = EnemyGenerationByTrip(ToPlace['TripType'][FromPlace['Name']])
+            print(' '.join(Enemy.chGetGeneralParam('Description').split()))
             # Fight
             WinFlag, FleeFlag =  HeroEnemyBattle(Hero, Enemy, 'Field')
             Hero.chHealthRestore()
             # Hero Wins
-            if WinFlag:
-                if not FleeFlag:
-                    # reward for Hero
-                    pass
-                # ask for continue
+            if WinFlag == 1 or FleeFlag == 1:
+                if FleeFlag == 0:
+                    print(Hero.chGetGeneralParam('Name'), 'won!')
+                    print(Enemy.chGetGeneralParam('Name'), 'is defeated!')
+                    hero_award = Hero.chGetGeneralParam('FindChance') * Enemy.chGetGeneralParam('Gold') / 100
+                    hero_award = round(hero_award)
+                    print('Found', hero_award, 'golds')
+                elif FleeFlag == 2:
+                    print(Hero.chGetGeneralParam('Name'), 'won!')
+                    print(Enemy.chGetGeneralParam('Name'), 'retreated!')
+                elif FleeFlag == 1:
+                    print(Hero.chGetGeneralParam('Name'), 'retreated!')
+                # continue trip?
+                cor_input = False
+                while not cor_input:
+                    print('1. Continue')
+                    print('2. Go back')
+                    user_choice = input('[> ')
+                    if user_choice in ('1', '2'):
+                        cor_input = True
+                        # go back
+                        if user_choice == '2':
+                            continue_flag = False
+                    else:
+                        print('Incorrect input! Try again.')
             # lose
             else:
+                print(Hero.chGetGeneralParam('Name'), 'lost!')
+                continue_flag = False
+                enemy_findchance = Enemy.chGetGeneralParam('FindChance') + Enemy.chGetGeneralParam('Level')
+                if enemy_findchance > 90:
+                    enemy_findchance = 90
                 # take hero's money
-                # and go to FromPlace
-                pass
+                hero_award = -enemy_findchance * Hero.chGetGeneralParam('Gold') / 100
+                hero_award = round(hero_award)
+                # loses to go to safe zone
+                if FromPlace['IsSafe']:
+                    hero_award -= ToPlace['TripLength'][FromPlace['Name']] * 2
+                else:
+                    Place = constCityPlace
+                    hero_award -= 200
         i += 1
+        if Hero.chGetGeneralParam('Gold') + hero_award < 0:
+            print('Lost whole gold.')
+            Hero.chSetGeneralParam('Gold', 0)
+        else:
+            if hero_award < 0:
+                print("Lost", abs(hero_award), "golds.")
+            Hero.chChangeGeneralParam('Gold', hero_award)
+        Params['Place'] = Place
+        SaveGame(Hero, Inventory, Params, 0)
     if i == ToPlace['TripLength'][FromPlace['Name']]:
         # Hero arrived
         if ToPlace['IsSafe']:
             Place = ToPlace
         else:
             # Hero can clear place or go home
-            pass
-    PlaceMenu(Hero, Inventory, Place)
+            cor_input = False
+            while not cor_input:
+                print('Now you at', ToPlace['Name'])
+                print('1. Clear the place (No one can help you)')
+                print('2. Go back (You can go back and stay alive)')
+                user_choice = input('[> ')
+                if user_choice in ('1', '2'):
+                    cor_input = True
+                    # clear
+                    if user_choice == '1':
+                        Place = ToPlace
+                        j = enemy_count
+                        alive_flag = True
+                        while j <= ToPlace['TripLength'][FromPlace['Name']] and alive_flag:
+                            if j == ToPlace['TripLength'][FromPlace['Name']]:
+                                Enemy = EnemyGenerationByTrip(ToPlace['BossType'])
+                            else:
+                                Enemy = EnemyGenerationByTrip(ToPlace['TripType'][FromPlace['Name']])
+                            j += 1
+                            print(' '.join(Enemy.chGetGeneralParam('Description').split()))
+                            # Fight
+                            WinFlag, FleeFlag = HeroEnemyBattle(Hero, Enemy, 'Field')
+                            if WinFlag == 1:
+                                if FleeFlag == 0:
+                                    print(Hero.chGetGeneralParam('Name'), 'won!')
+                                    print(Enemy.chGetGeneralParam('Name'), 'is defeated!')
+                                    hero_award = Hero.chGetGeneralParam('FindChance') * \
+                                                 Enemy.chGetGeneralParam('Gold') / 100
+                                    hero_award = round(hero_award)
+                                    print('Found', hero_award, 'golds')
+                                    Hero.chChangeGeneralParam('Gold', hero_award)
+                                elif FleeFlag == 2:
+                                    print(Hero.chGetGeneralParam('Name'), 'won!')
+                                    print(Enemy.chGetGeneralParam('Name'), 'retreated!')
+                            else:
+                                print(Hero.chGetGeneralParam('Name'), 'lost!')
+                                alive_flag = False
+                                if FleeFlag == 1:
+                                    print(Hero.chGetGeneralParam('Name'), 'retreated!')
+                                    Place = FromPlace
+                                else:
+                                    Boss = EnemyGenerationByTrip(ToPlace['BossType'])
+                                    enemy_findchance = Boss.chGetGeneralParam('FindChance') + \
+                                                       Boss.chGetGeneralParam('Level')
+                                    if enemy_findchance > 100:
+                                        enemy_findchance = 100
+                                    hero_award = -enemy_findchance * Hero.chGetGeneralParam('Gold') / 100
+                                    hero_award = round(hero_award)
+                                    print('Lost', hero_award, 'golds.')
+                                    if Hero.chGetGeneralParam('Gold') + hero_award < 0:
+                                        Hero.chSetGeneralParam('Gold', 0)
+                                    else:
+                                        Hero.chChangeGeneralParam('Gold', hero_award)
+                                    # loses weapon and armour
+                                    if WhatWillHappen({1: enemy_findchance}):
+                                        Hero.chRemoveWeapon(Hero.chGetWeapon())
+                                        Inventory[0].remove(Hero.chGetWeapon())
+                                        print('Lost weapon.')
+                                    if WhatWillHappen({1: enemy_findchance}):
+                                        Hero.chRemoveArmour(Hero.chGetArmour())
+                                        Inventory[1].remove(Hero.chGetArmour())
+                                        print('Lost armour.')
+                                    Place = constCityPlace
+                                    Params['Place'] = Place
+                                SaveGame(Hero, Inventory, Params, 0)
+                    Hero.chHealthRestore()
+                else:
+                    print('Incorrect input! Try again.')
+    Params['Place'] = Place
+    SaveGame(Hero, Inventory, Params, 0)
+    PlaceMenu(Hero, Inventory, Params)
 
-def PlaceMenu(Hero, Inventory, Place = constCityName):
+def PlaceMenu(Hero, Inventory, Params):
     ''' Function that show Menu of the Place (City and others). User can choose
         what he want to do. Other place has it's own list of option. But there is
         layout
     '''
-    PlaceName = ''
+    Place = Params['Place']
+    PlaceName = Place['Name']
     # list of all option
     # some options are always available
     # that's my order of option:
@@ -1446,8 +1564,7 @@ def PlaceMenu(Hero, Inventory, Place = constCityName):
                              'Physician': TownPhysician, 'Character': HeroInfoOption,
                              'Save': SaveGame, 'Menu': MainMenu}
     CurPlaceOptions = {}
-    if Place == constCityName:
-        PlaceName = constCityName
+    if Place == constCityPlace:
         GeneralPlaceOptions['Market'] = 1
         GeneralPlaceOptions['Arena'] = 1
         GeneralPlaceOptions['Physician'] = 1
@@ -1463,17 +1580,24 @@ def PlaceMenu(Hero, Inventory, Place = constCityName):
         print(str(key) + '.', CurPlaceOptions[key])
     print()
     userChoice = input('You decided to [> ')
-    if userChoice.isdigit():
+    if userChoice == 'Give me GODMODE!':
+        exec(input('[>>> '))
+        PlaceMenu(Hero, Inventory, Params)
+    elif userChoice.isdigit():
         if int(userChoice) in CurPlaceOptions.keys():
             if CurPlaceOptions[int(userChoice)] in ('Save', 'Market', 'Character', 'Arena', 'Physician'):
-                GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]](Hero, Inventory)
-                PlaceMenu(Hero, Inventory, Place)
+                GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]](Hero, Inventory, Params)
+                PlaceMenu(Hero, Inventory, Params)
             elif CurPlaceOptions[int(userChoice)] in ('Menu'):
-                Hero, Inventory = GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]]()
-                PlaceMenu(Hero, Inventory, Place)
+                Hero, Inventory, Params = GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]]()
+                PlaceMenu(Hero, Inventory, Params)
+
             else:
                 print('Not available yet :(')
+                PlaceMenu(Hero, Inventory, Params)
         else:
             print('Impossible to choose', userChoice)
+            PlaceMenu(Hero, Inventory, Params)
     else:
         print('Use only digits!')
+        PlaceMenu(Hero, Inventory, Params)

@@ -9,7 +9,7 @@
 # Main file
 from AdFuncFile import *
 # start game
-Hero, Inventory = MainMenu()
+Hero, Inventory, Params = MainMenu()
 # show City menu (Hero and Inventory exist)
-PlaceMenu(Hero, Inventory, 'City')
+PlaceMenu(Hero, Inventory, Params)
 # It's all :D

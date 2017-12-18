@@ -39,7 +39,10 @@ constWeaponParams = ('Name', 'Description', 'Price', 'MinDamage', 'MaxDamage',
 constArmourParams = ('Name', 'Description', 'Price', 'HealthBoost', 'SpeedBoost')
 # Random functions for trips
 constEasyTrip = {'EasyEnemy': 80, 'AnimalEnemy': 15, 'MediumEnemy': 5 }
-constMediumTrip = {'EasyEnemy': 15, 'AnimalEnemy': 10, 'MediumEnemy': 70,
+# FOR TESTS:
+#constMediumTrip = {'EasyEnemy': 15, 'AnimalEnemy': 10, 'MediumEnemy': 70,
+#                   'HardEnemy': 5}
+constMediumTrip = {'EasyEnemy': 15, 'AnimalEnemy': 10, 'MediumEnemy': 75,
                    'HardEnemy': 5}
 constHardTrip = {'EasyEnemy': 5, 'AnimalEnemy': 5, 'MediumEnemy': 35,
                  'HardEnemy': 55}
@@ -48,7 +51,9 @@ constForestTrip = {'EasyEnemy': 10, 'AnimalEnemy': 90}
 constArenaAnimal = {'AnimalEnemy': 100}
 # random functions for bosses
 constEasyBoss = {'EasyEnemy': 30, 'MediumEnemy': 70}
-constMediumBoss = {'MediumEnemy': 20, 'HardEnemy': 80}
+# FOR TESTS:
+#constMediumBoss = {'MediumEnemy': 20, 'HardEnemy': 80}
+constMediumBoss = {'MediumEnemy':100, 'HardEnemy': 80}
 constHardBoss = {'HardEnemy': 40, 'UniqueEnemy': 60}
 constVeryHardBoss = {'HardEnemy': 10, 'UniqueEnemy': 90}
 # Names of places
