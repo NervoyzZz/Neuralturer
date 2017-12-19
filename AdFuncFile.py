@@ -1453,6 +1453,8 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                     print(Hero.chGetGeneralParam('Name'), 'retreated!')
                 # continue trip?
                 cor_input = False
+                print(Hero.chGetGeneralParam('Name'), ' ' * 3, 'Health:',
+                      str(Hero.chGetGeneralParam('CHealth')) + '/' + str(Hero.chGetGeneralParam('MHealth')))
                 while not cor_input:
                     print('1. Continue')
                     print('2. Go back')
@@ -1480,6 +1482,7 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                 else:
                     Place = constCityPlace
                     hero_award -= 200
+                print('You was taken by good men. They bring you to', Place['Name'] + '.')
             if Hero.chGetGeneralParam('Gold') + hero_award < 0:
                 print('Lost whole gold.')
                 Hero.chSetGeneralParam('Gold', 0)
@@ -1492,6 +1495,7 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
         SaveGame(Hero, Inventory, Params, 0)
     if i == ToPlace['TripLength'][FromPlace['Name']]:
         # Hero arrived
+        print('You successfully arrived!')
         if ToPlace['IsSafe']:
             Place = ToPlace
         else:
@@ -1511,6 +1515,7 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                         alive_flag = True
                         while j <= ToPlace['TripLength'][FromPlace['Name']] and alive_flag:
                             if j == ToPlace['TripLength'][FromPlace['Name']]:
+                                print('It\'s BOSS time!')
                                 Enemy = EnemyGenerationByTrip(ToPlace['BossType'])
                             else:
                                 Enemy = EnemyGenerationByTrip(ToPlace['TripType'][FromPlace['Name']])
@@ -1527,6 +1532,9 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                                     hero_award = round(hero_award)
                                     print('Found', hero_award, 'golds')
                                     Hero.chChangeGeneralParam('Gold', hero_award)
+                                    # ~~~~~~~~~~~~~~~~~~~~~~~
+                                    # NEED to add boss drop
+                                    # ~~~~~~~~~~~~~~~~~~~~~~~
                                 elif FleeFlag == 2:
                                     print(Hero.chGetGeneralParam('Name'), 'won!')
                                     print(Enemy.chGetGeneralParam('Name'), 'retreated!')
@@ -1536,14 +1544,19 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                                 if Hero.chGetGeneralParam('Experience') >= chHowMuchExpNeed(
                                                     Hero.chGetGeneralParam('Level') + 1):
                                     HeroNewLevel(Hero)
+                                print(Hero.chGetGeneralParam('Name'), ' ' * 3, 'Health:',
+                                      str(Hero.chGetGeneralParam('CHealth')) + '/' + str(
+                                          Hero.chGetGeneralParam('MHealth')))
                             else:
                                 print(Hero.chGetGeneralParam('Name'), 'lost!')
                                 alive_flag = False
                                 if FleeFlag == 1:
                                     print(Hero.chGetGeneralParam('Name'), 'retreated!')
                                     Place = FromPlace
+                                    print('You run to', Place['Name'])
                                 else:
-                                    Boss = EnemyGenerationByTrip(ToPlace['BossType'])
+                                    if j <= ToPlace['TripLength'][FromPlace['Name']]:
+                                        Boss = EnemyGenerationByTrip(ToPlace['BossType'])
                                     enemy_findchance = Boss.chGetGeneralParam('FindChance') + \
                                                        Boss.chGetGeneralParam('Level')
                                     if enemy_findchance > 100:
@@ -1565,6 +1578,7 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                                         Inventory[1].remove(Hero.chGetArmour())
                                         print('Lost armour.')
                                     Place = constCityPlace
+                                    print('You was found by good men. They bring you to', Place['Name'] + '.')
                                     Params['Place'] = Place
                                 SaveGame(Hero, Inventory, Params, 0)
                     Hero.chHealthRestore()
