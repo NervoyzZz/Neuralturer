@@ -90,9 +90,9 @@ constToAbandonedFortTrip = {constCityName: constToCityTrip[constAbandonedFortNam
                             constFortName: constToFortTrip[constAbandonedFortName]}
 constToDenTrip = {constCityName: constToCityTrip[constDenName]}
 constToCoastalCaveTrip = {constTowerName: constToTowerTrip[constCoastalCaveName]}
-# Places INFO {Name, TripLength, IsSafe, TripType, EnemyChance, BossType}
+# Places INFO {Name, TripLength, IsSafe, TripType, PossibleTrip, EnemyChance, BossType}
 # place name, how far is place, is place safe? trip type, chance to meet enemy,
-# boss type in place (if need)
+# boss type in place (if need); PossibleTrip = tuple of Possibble places with info
 constCityPlace = {'Name': constCityName, 'TripLength': constToCityLength,
                   'IsSafe': True, 'TripType': constToCityTrip, 'EnemyChance': 100}
 constFortPlace = {'Name': constFortName, 'TripLength': constToFortLength,
@@ -106,12 +106,35 @@ constAbandonedFortPlace = {'Name': constAbandonedFortName,
                            'TripType': constToAbandonedFortTrip,
                            'EnemyChance': 65, 'BossType': constMediumBoss}
 constDenPlace = {'Name': constDenName, 'TripLength': constToDenLength,
-                 'IsSafe': False, 'TripType': constToDenTrip, 'EnemyChance': 50,
-                 'BossType': constHardBoss}
+                 'IsSafe': False, 'TripType': constToDenTrip, 'EnemyChance': 50}
 constCoastalCavePlace = {'Name': constCoastalCaveName,
                          'TripLength': constToCoastalCaveLength,
                          'IsSafe': False, 'TripType': constToCoastalCaveTrip,
                          'EnemyChance': 70, 'BossType': constVeryHardBoss}
+# Possible trips FromPlace
+# let's show Python future variables
+constFromCityTrip = [[constFortPlace, 'Easy'], [constTowerPlace, 'Easy'],
+                     [constHofPlace, 'Easy'], [constAbandonedFortPlace, 'Medium'],
+                     [constDenPlace, 'Medium']]
+constFromFortTrip = [[constCityPlace, 'Easy'],
+                     [constAbandonedFortPlace, 'Medium']]
+constFromTowerTrip = [[constCityPlace, 'Easy'],
+                      [constCoastalCavePlace, 'Very hard']]
+constFromHofTrip = [[constCityPlace, 'Easy']]
+constFromAbandonedFortTrip = [[constCityPlace, 'Medium'],
+                              [constFortPlace, 'Medium']]
+constFromDenTrip = [[constCityPlace, 'Medium']]
+constFromCoastalCaveTrip = [[constTowerPlace, 'Very hard']]
+# append Places
+constCityPlace['PossibleTrip'] = constFromCityTrip
+constFortPlace['PossibleTrip'] = constFromFortTrip
+constTowerPlace['PossibleTrip'] = constFromTowerTrip
+constHofPlace['PossibleTrip'] = constFromHofTrip
+constAbandonedFortPlace['PossibleTrip'] = constFromAbandonedFortTrip
+constDenPlace['PossiblePlace'] = constFromDenTrip
+constCoastalCavePlace['PossibleTrip'] = constFromCoastalCaveTrip
+# Keys for Params
+constDefaultParams = {'Place': constCityPlace}
 # Weapons and Armours
 constNoneWeapon = ({'Name': 'None', 'Description': '', 'Price': 0,
                     'Damage': (0, 0), 'AttackSpeed': 0}, )

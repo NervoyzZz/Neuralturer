@@ -730,16 +730,22 @@ def ContinueGame():
         call ContinueGame
     '''
     f = open(constDataFileName, 'br')
-    Hero, Inv, Params = load(f)
+    Hero, Inv, Par = load(f)
     f.close()
     resH = clCharacter()
     resI = [[],[]]
+    resP = {}
     for keys in constGeneralParams:
         resH.chSetGeneralParam(keys, Hero[0][keys])
     for keys in constCommonTraits:
         resH.chSetCommonTrait(keys, Hero[3][keys])
     for keys in constSpecialTraits:
         resH.chSetSpecialTrait(keys, Hero[4][keys])
+    for keys in constDefaultParams.keys():
+        if keys in Par.keys():
+            resP[keys] = Par[keys]
+        else:
+            resP[keys] = constDefaultParams[keys]
     wep = clWeapon()
     arm = clArmour()
     for keys in constWeaponParams:
@@ -758,7 +764,7 @@ def ContinueGame():
         for keys in constArmourParams:
             a[keys] = arms[keys]
         resI[1].append(a)
-    return (resH, resI, Params)
+    return (resH, resI, resP)
 
 def AboutGame():
     ''' Just info about the game. It will be shown if user choose About in MainMenu '''
@@ -1081,25 +1087,28 @@ def HeroInfoOption(Hero, Inventory, Params):
                 print('Impossible to choose', pch)
         print()
 
-def TownPhysician(Hero, Inventory, Params, type = constCityName):
+def TownPhysician(Hero, Inventory, Params):
     ''' Option Visit Physician in some places.
         In constCityName you can pay for full health restoring and for BattleRestoring
         In one place, there will be only free full restoration
     '''
     PlayerChoice = '-1'
-    if type == constCityName:
-        fulprice = 100
-        poulticeprice = 30
-    else:
+    if Params['Place'] == constHofPlace:
         fulprice = 0
         poulticeprice = 0
+    elif Params['Place']['IsSafe']:
+        fulprice = 100
+        poulticeprice = 35
+    else:
+        fulprice = 200
+        poulticeprice = 70
     while PlayerChoice != '3':
         print('_____PHYSICIAN_____')
         # there will be if for unique place where it's free to full restoration
-        print('1. Ask for full healing (100 golds)')
+        print('1. Ask for full healing (' + str(fulprice), 'golds)')
         print('2. Ask for healing poultice (max restore',
               str(Hero.chGetGeneralParam('BattleRestore') *
-              Hero.chGetGeneralParam('MHealth') // 100), ') (30 golds)')
+              Hero.chGetGeneralParam('MHealth') // 100), ') ('+str(poulticeprice), 'golds)')
         print('3. Leave')
         print()
         print('You have', Hero.chGetGeneralParam('Gold'), 'golds')
@@ -1389,8 +1398,6 @@ def CityArena(Hero, Inventory, Params):
             SaveGame(Hero, Inventory, Params, 0)
         print()
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# NOT READY
 def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
     ''' Function of Character adventure. Hero go from FromPlace to ToPlace,
         fight with enemies, can return, when he arrives, he can clean place,
@@ -1545,7 +1552,29 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                     print('Incorrect input! Try again.')
     Params['Place'] = Place
     SaveGame(Hero, Inventory, Params, 0)
-    PlaceMenu(Hero, Inventory, Params)
+    return Hero, Inventory, Params
+
+def AdventureOption(Hero, Inventory, Params):
+    ''' That's is function that makes it possible to travel'''
+    Place = Params['Place']
+    PlayerChoice = '-1'
+    while PlayerChoice != '0':
+        for i in range(len(Place['PossibleTrip'])):
+            print(str(i+1)+'.', Place['PossibleTrip'][i][0]['Name'],
+                  '('+Place['PossibleTrip'][i][1]+')')
+        print('0. Back')
+        print()
+        PlayerChoice = input('You decided: [> ')
+        if PlayerChoice.isdigit() and PlayerChoice != '0':
+            if int(PlayerChoice) <= len(Place['PossibleTrip']):
+                Hero, Inventory, Params = TripFromToPlace(Hero, Inventory, Params, Place,
+                                                          Place['PossibleTrip'][int(PlayerChoice)-1][0])
+            else:
+                print('Incorrect input!')
+        elif not PlayerChoice.isdigit():
+            print('Use only digits!')
+    return Hero, Inventory, Params
+
 
 def PlaceMenu(Hero, Inventory, Params):
     ''' Function that show Menu of the Place (City and others). User can choose
@@ -1557,17 +1586,17 @@ def PlaceMenu(Hero, Inventory, Params):
     # list of all option
     # some options are always available
     # that's my order of option:
-    GeneralPlaceOptions = {'Inspect': 0, 'Adventure': 0, 'Market': 0, 'Tavern': 0,
-                           'Arena': 0, 'Physician': 0, 'Character': 1, 'Save': 1,
+    GeneralPlaceOptions = {'Inspect': 1, 'Adventure': 1, 'Market': 0, 'Tavern': 0,
+                           'Arena': 0, 'Physician': 1, 'Character': 1, 'Save': 1,
                            'Menu': 1}
     GeneralPlaceFunctions = {'Market': CityMarket, 'Arena': CityArena,
                              'Physician': TownPhysician, 'Character': HeroInfoOption,
-                             'Save': SaveGame, 'Menu': MainMenu}
+                             'Save': SaveGame, 'Menu': MainMenu, 'Adventure': AdventureOption}
     CurPlaceOptions = {}
     if Place == constCityPlace:
         GeneralPlaceOptions['Market'] = 1
         GeneralPlaceOptions['Arena'] = 1
-        GeneralPlaceOptions['Physician'] = 1
+        GeneralPlaceOptions['Tavern'] = 1
     i = 1
     for key in GeneralPlaceOptions.keys():
         if GeneralPlaceOptions[key] == 1:
@@ -1591,7 +1620,10 @@ def PlaceMenu(Hero, Inventory, Params):
             elif CurPlaceOptions[int(userChoice)] in ('Menu'):
                 Hero, Inventory, Params = GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]]()
                 PlaceMenu(Hero, Inventory, Params)
-
+            elif  CurPlaceOptions[int(userChoice)] in('Adventure'):
+                Hero, Inventory, Params = \
+                    GeneralPlaceFunctions[CurPlaceOptions[int(userChoice)]](Hero, Inventory, Params)
+                PlaceMenu(Hero, Inventory, Params)
             else:
                 print('Not available yet :(')
                 PlaceMenu(Hero, Inventory, Params)
