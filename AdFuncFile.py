@@ -13,6 +13,8 @@ from random import randint, choice
 from pickle import dump, load
 # to check file exists
 import os.path
+# need for PlaceMenu function
+from collections import OrderedDict
 from AdConstFile import *
 
 
@@ -1093,7 +1095,7 @@ def TownPhysician(Hero, Inventory, Params):
         In one place, there will be only free full restoration
     '''
     PlayerChoice = '-1'
-    if Params['Place'] == constHofPlace:
+    if Params['Place']['Name'] == constHofName:
         fulprice = 0
         poulticeprice = 0
     elif Params['Place']['IsSafe']:
@@ -1432,9 +1434,21 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                     hero_award = Hero.chGetGeneralParam('FindChance') * Enemy.chGetGeneralParam('Gold') / 100
                     hero_award = round(hero_award)
                     print('Found', hero_award, 'golds')
+                    # experience
+                    Hero.chChangeGeneralParam('Experience',
+                                              Enemy.chGetGeneralParam('Level') // 10 + 1)
+                    if Hero.chGetGeneralParam('Experience') >= chHowMuchExpNeed(
+                                    Hero.chGetGeneralParam('Level') + 1):
+                        HeroNewLevel(Hero)
                 elif FleeFlag == 2:
                     print(Hero.chGetGeneralParam('Name'), 'won!')
                     print(Enemy.chGetGeneralParam('Name'), 'retreated!')
+                    # experience
+                    Hero.chChangeGeneralParam('Experience',
+                                              Enemy.chGetGeneralParam('Level') // 10 + 1)
+                    if Hero.chGetGeneralParam('Experience') >= chHowMuchExpNeed(
+                                    Hero.chGetGeneralParam('Level') + 1):
+                        HeroNewLevel(Hero)
                 elif FleeFlag == 1:
                     print(Hero.chGetGeneralParam('Name'), 'retreated!')
                 # continue trip?
@@ -1466,14 +1480,14 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                 else:
                     Place = constCityPlace
                     hero_award -= 200
+            if Hero.chGetGeneralParam('Gold') + hero_award < 0:
+                print('Lost whole gold.')
+                Hero.chSetGeneralParam('Gold', 0)
+            else:
+                if hero_award < 0:
+                    print("Lost", abs(hero_award), "golds.")
+                Hero.chChangeGeneralParam('Gold', hero_award)
         i += 1
-        if Hero.chGetGeneralParam('Gold') + hero_award < 0:
-            print('Lost whole gold.')
-            Hero.chSetGeneralParam('Gold', 0)
-        else:
-            if hero_award < 0:
-                print("Lost", abs(hero_award), "golds.")
-            Hero.chChangeGeneralParam('Gold', hero_award)
         Params['Place'] = Place
         SaveGame(Hero, Inventory, Params, 0)
     if i == ToPlace['TripLength'][FromPlace['Name']]:
@@ -1516,6 +1530,12 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                                 elif FleeFlag == 2:
                                     print(Hero.chGetGeneralParam('Name'), 'won!')
                                     print(Enemy.chGetGeneralParam('Name'), 'retreated!')
+                                # experience
+                                Hero.chChangeGeneralParam('Experience',
+                                                          Enemy.chGetGeneralParam('Level') // 10 + 1)
+                                if Hero.chGetGeneralParam('Experience') >= chHowMuchExpNeed(
+                                                    Hero.chGetGeneralParam('Level') + 1):
+                                    HeroNewLevel(Hero)
                             else:
                                 print(Hero.chGetGeneralParam('Name'), 'lost!')
                                 alive_flag = False
@@ -1569,6 +1589,7 @@ def AdventureOption(Hero, Inventory, Params):
             if int(PlayerChoice) <= len(Place['PossibleTrip']):
                 Hero, Inventory, Params = TripFromToPlace(Hero, Inventory, Params, Place,
                                                           Place['PossibleTrip'][int(PlayerChoice)-1][0])
+                PlayerChoice = '0'
             else:
                 print('Incorrect input!')
         elif not PlayerChoice.isdigit():
@@ -1586,14 +1607,14 @@ def PlaceMenu(Hero, Inventory, Params):
     # list of all option
     # some options are always available
     # that's my order of option:
-    GeneralPlaceOptions = {'Inspect': 1, 'Adventure': 1, 'Market': 0, 'Tavern': 0,
-                           'Arena': 0, 'Physician': 1, 'Character': 1, 'Save': 1,
-                           'Menu': 1}
+    GeneralPlaceOptions = OrderedDict([('Inspect', 1), ('Adventure', 1), ('Market', 0),
+                                       ('Tavern', 0), ('Arena', 0), ('Physician', 1),
+                                       ('Character', 1), ('Save', 1), ('Menu', 1)])
     GeneralPlaceFunctions = {'Market': CityMarket, 'Arena': CityArena,
                              'Physician': TownPhysician, 'Character': HeroInfoOption,
                              'Save': SaveGame, 'Menu': MainMenu, 'Adventure': AdventureOption}
-    CurPlaceOptions = {}
-    if Place == constCityPlace:
+    CurPlaceOptions = OrderedDict()
+    if PlaceName == constCityName:
         GeneralPlaceOptions['Market'] = 1
         GeneralPlaceOptions['Arena'] = 1
         GeneralPlaceOptions['Tavern'] = 1
@@ -1602,8 +1623,6 @@ def PlaceMenu(Hero, Inventory, Params):
         if GeneralPlaceOptions[key] == 1:
             CurPlaceOptions[i] = key
             i += 1
-    # Keys are in not my order :(
-    # It's work, but doesn't look like I want to
     print('~~~~~____' + PlaceName + '____~~~~~')
     for key in CurPlaceOptions.keys():
         print(str(key) + '.', CurPlaceOptions[key])
