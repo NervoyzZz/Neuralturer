@@ -1434,6 +1434,19 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                     hero_award = Hero.chGetGeneralParam('FindChance') * Enemy.chGetGeneralParam('Gold') / 100
                     hero_award = round(hero_award)
                     print('Found', hero_award, 'golds')
+                    # drop:
+                    enemy_weapon = Enemy.chGetWeapon()
+                    if enemy_weapon['Name'] != 'None':
+                        if WhatWillHappen({1: Hero.chGetGeneralParam('FindChance')/4}):
+                            print('You found', enemy_weapon['Name'])
+                            if enemy_weapon not in Inventory[0]:
+                                Inventory[0].append(enemy_weapon)
+                    enemy_armour = Enemy.chGetArmour()
+                    if enemy_armour['Name'] != 'None':
+                        if WhatWillHappen({1: Hero.chGetGeneralParam('FindChance')/4}):
+                            print('You found', enemy_armour['Name'])
+                            if enemy_armour not in Inventory[1]:
+                                Inventory[1].append(enemy_armour)
                     # experience
                     Hero.chChangeGeneralParam('Experience',
                                               Enemy.chGetGeneralParam('Level') // 10 + 1)
@@ -1532,9 +1545,20 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                                     hero_award = round(hero_award)
                                     print('Found', hero_award, 'golds')
                                     Hero.chChangeGeneralParam('Gold', hero_award)
-                                    # ~~~~~~~~~~~~~~~~~~~~~~~
-                                    # NEED to add boss drop
-                                    # ~~~~~~~~~~~~~~~~~~~~~~~
+                                    # boss drop. Yes, only boss, but chance is greater.
+                                    if j > ToPlace['TripLength'][FromPlace['Name']]:
+                                        enemy_weapon = Enemy.chGetWeapon()
+                                        if enemy_weapon['Name'] != 'None':
+                                            if WhatWillHappen({1: Hero.chGetGeneralParam('FindChance') / 2}):
+                                                print('You found', enemy_weapon['Name'])
+                                                if enemy_weapon not in Inventory[0]:
+                                                    Inventory[0].append(enemy_weapon)
+                                        enemy_armour = Enemy.chGetArmour()
+                                        if enemy_armour['Name'] != 'None':
+                                            if WhatWillHappen({1: Hero.chGetGeneralParam('FindChance') / 2}):
+                                                print('You found', enemy_armour['Name'])
+                                                if enemy_armour not in Inventory[1]:
+                                                    Inventory[1].append(enemy_armour)
                                 elif FleeFlag == 2:
                                     print(Hero.chGetGeneralParam('Name'), 'won!')
                                     print(Enemy.chGetGeneralParam('Name'), 'retreated!')
