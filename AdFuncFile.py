@@ -183,9 +183,9 @@ class clCharacter:
         int Undead - every point increase chHealth by 20
         int Carrier - every point increase chMaxPotions by 2
         int QuickHand - every point increase chSpeed by 50
-        int OnePunch - every point increase chSpeed by 8
+        int OnePunch - every point increase chDamage by 8
         int Physician - every point increase chBattleRestore by 16
-        int Trader - character gets 1000 Golds
+        int Trader - character gets 10000 Golds
 
         Methods:
         chShowInfo(Param); Param = 0, 1, 2, 3
@@ -376,7 +376,7 @@ class clCharacter:
             elif SpecialTraitKey == 'Physician':
                 self.__chGeneralParam['BattleRestore'] += 16
             elif SpecialTraitKey == 'Trader':
-                self.__chGeneralParam['Gold'] += 1000
+                self.__chGeneralParam['Gold'] += 10000
         else:
             print("Imposible to improve", SpecialTraitKey)
 
@@ -657,8 +657,11 @@ def HeroNewLevel(Hero):
         print("What would you like to increase?")
         trait = input('[> ').lower().capitalize()
         if trait in constCommonTraits:
-            Hero.chIncreaseCommonTrait(trait)
-            points -= 1
+            if Hero.chGetCommonTrait(trait) == 10:
+                print('Max level of', trait)
+            else:
+                Hero.chIncreaseCommonTrait(trait)
+                points -= 1
         else:
             print('There is no', trait + '. Try again!')
     while spoints > 0:
@@ -901,7 +904,7 @@ def CityMarket(Hero, Inventory, Params):
             print('8. Leave')
             print()
             pch = input('You decided: [> ')
-            if pch in weapstr:
+            if pch in weapstr and pch != '':
                 if pch == '8':
                     PlayerChoice = 0
                 else:
@@ -946,7 +949,7 @@ def CityMarket(Hero, Inventory, Params):
             print('3. Leave')
             print()
             pch = input('You decided: [> ')
-            if pch in armstr:
+            if pch in armstr and pch != '':
                 if pch == '3':
                     PlayerChoice = 0
                 else:
@@ -988,7 +991,7 @@ def CityMarket(Hero, Inventory, Params):
             print('4. Leave')
             print()
             pch = input('You decided: [> ')
-            if pch in '01234':
+            if pch in '01234' and pch != '':
                 if pch == '4':
                     PlayerChoice = 0
                 else:
@@ -1506,7 +1509,7 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
         i += 1
         Params['Place'] = Place
         SaveGame(Hero, Inventory, Params, 0)
-    if i == ToPlace['TripLength'][FromPlace['Name']]:
+    if i == ToPlace['TripLength'][FromPlace['Name']] and continue_flag:
         # Hero arrived
         print('You successfully arrived!')
         if ToPlace['IsSafe']:
@@ -1587,19 +1590,22 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                                         enemy_findchance = 100
                                     hero_award = -enemy_findchance * Hero.chGetGeneralParam('Gold') / 100
                                     hero_award = round(hero_award)
-                                    print('Lost', hero_award, 'golds.')
+                                    print('Lost', abs(hero_award), 'golds.')
                                     if Hero.chGetGeneralParam('Gold') + hero_award < 0:
                                         Hero.chSetGeneralParam('Gold', 0)
                                     else:
                                         Hero.chChangeGeneralParam('Gold', hero_award)
                                     # loses weapon and armour
                                     if WhatWillHappen({1: enemy_findchance}):
-                                        Hero.chRemoveWeapon(Hero.chGetWeapon())
-                                        Inventory[0].remove(Hero.chGetWeapon())
-                                        print('Lost weapon.')
+                                        if Hero.chGetWeapon()['Name'] != constHeroStartWeapon['Name']:
+                                            Inventory[0].remove(Hero.chGetWeapon())
+                                            Hero.chRemoveWeapon(Hero.chGetWeapon())
+                                            print('Lost weapon.')
+                                        else:
+                                            print('They don\'t want to have your trash.')
                                     if WhatWillHappen({1: enemy_findchance}):
-                                        Hero.chRemoveArmour(Hero.chGetArmour())
                                         Inventory[1].remove(Hero.chGetArmour())
+                                        Hero.chRemoveArmour(Hero.chGetArmour())
                                         print('Lost armour.')
                                     Place = constCityPlace
                                     print('You was found by good men. They bring you to', Place['Name'] + '.')

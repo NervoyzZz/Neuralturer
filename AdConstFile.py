@@ -53,7 +53,7 @@ constArenaAnimal = {'AnimalEnemy': 100}
 constEasyBoss = {'EasyEnemy': 30, 'MediumEnemy': 70}
 # FOR TESTS:
 #constMediumBoss = {'MediumEnemy': 20, 'HardEnemy': 80}
-constMediumBoss = {'MediumEnemy':100, 'HardEnemy': 80}
+constMediumBoss = {'MediumEnemy': 100, 'HardEnemy': 80}
 constHardBoss = {'HardEnemy': 40, 'UniqueEnemy': 60}
 constVeryHardBoss = {'HardEnemy': 10, 'UniqueEnemy': 90}
 # Names of places
@@ -69,7 +69,7 @@ constDragonIslandName = 'It\'s secret for now ;)'
 constToCityLength = {constFortName: 5, constTowerName: 10, constHofName:5,
                      constAbandonedFortName: 15, constDenName: 25}
 constToFortLength = {constCityName: constToCityLength[constFortName],
-                     constAbandonedFortName: 15}
+                     constAbandonedFortName: 13}
 constToTowerLength = {constCityName: constToCityLength[constTowerName],
                       constCoastalCaveName: 40}
 constToHofLength = {constCityName: constToCityLength[constHofName]}
@@ -106,7 +106,8 @@ constAbandonedFortPlace = {'Name': constAbandonedFortName,
                            'TripType': constToAbandonedFortTrip,
                            'EnemyChance': 65, 'BossType': constMediumBoss}
 constDenPlace = {'Name': constDenName, 'TripLength': constToDenLength,
-                 'IsSafe': False, 'TripType': constToDenTrip, 'EnemyChance': 50}
+                 'IsSafe': False, 'TripType': constToDenTrip, 'EnemyChance': 50,
+                 'BossType': constMediumBoss}
 constCoastalCavePlace = {'Name': constCoastalCaveName,
                          'TripLength': constToCoastalCaveLength,
                          'IsSafe': False, 'TripType': constToCoastalCaveTrip,
