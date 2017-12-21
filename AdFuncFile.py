@@ -534,12 +534,10 @@ def EnemyGenerationByTrip(TripType, HeroLvl = 25):
         EnemyType, then create Enemy and return it.
     '''
     # So let's choose EnemyType:
-    print('TripType:', TripType)
     resEnemy = -1
     EnemyInfo = -1
     if TripType not in ('ArenaE', 'ArenaM', 'ArenaH'):
         EnemyType = WhatWillHappen(TripType)
-        print('Enemy type:', EnemyType)
         if EnemyType == 'EasyEnemy':
             EnemyInfo = choice(constEasyEnemy)
         elif EnemyType == 'MediumEnemy':
