@@ -534,16 +534,22 @@ def EnemyGenerationByTrip(TripType, HeroLvl = 25):
         EnemyType, then create Enemy and return it.
     '''
     # So let's choose EnemyType:
+    print('TripType:', TripType)
     resEnemy = -1
     EnemyInfo = -1
     if TripType not in ('ArenaE', 'ArenaM', 'ArenaH'):
         EnemyType = WhatWillHappen(TripType)
+        print('Enemy type:', EnemyType)
         if EnemyType == 'EasyEnemy':
             EnemyInfo = choice(constEasyEnemy)
         elif EnemyType == 'MediumEnemy':
             EnemyInfo = choice(constMediumEnemy)
         elif EnemyType == 'AnimalEnemy':
             EnemyInfo = choice(constAnimalEnemy)
+        elif EnemyType == 'HardEnemy':
+            EnemyInfo = choice(constHardEnemy)
+        elif EnemyType == 'UniqueEnemy':
+            EnemyInfo = choice(constUniqueEnemy)
         else:
             print("Error! Enable to choice Enemy.")
             return resEnemy
@@ -1583,9 +1589,9 @@ def TripFromToPlace(Hero, Inventory, Params, FromPlace, ToPlace):
                                     print('You run to', Place['Name'])
                                 else:
                                     if j <= ToPlace['TripLength'][FromPlace['Name']]:
-                                        Boss = EnemyGenerationByTrip(ToPlace['BossType'])
-                                    enemy_findchance = Boss.chGetGeneralParam('FindChance') + \
-                                                       Boss.chGetGeneralParam('Level')
+                                        Enemy = EnemyGenerationByTrip(ToPlace['BossType'])
+                                    enemy_findchance = Enemy.chGetGeneralParam('FindChance') + \
+                                                       Enemy.chGetGeneralParam('Level')
                                     if enemy_findchance > 100:
                                         enemy_findchance = 100
                                     hero_award = -enemy_findchance * Hero.chGetGeneralParam('Gold') / 100

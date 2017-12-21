@@ -39,10 +39,7 @@ constWeaponParams = ('Name', 'Description', 'Price', 'MinDamage', 'MaxDamage',
 constArmourParams = ('Name', 'Description', 'Price', 'HealthBoost', 'SpeedBoost')
 # Random functions for trips
 constEasyTrip = {'EasyEnemy': 80, 'AnimalEnemy': 15, 'MediumEnemy': 5 }
-# FOR TESTS:
-#constMediumTrip = {'EasyEnemy': 15, 'AnimalEnemy': 10, 'MediumEnemy': 70,
-#                   'HardEnemy': 5}
-constMediumTrip = {'EasyEnemy': 15, 'AnimalEnemy': 10, 'MediumEnemy': 75,
+constMediumTrip = {'EasyEnemy': 15, 'AnimalEnemy': 10, 'MediumEnemy': 70,
                    'HardEnemy': 5}
 constHardTrip = {'EasyEnemy': 5, 'AnimalEnemy': 5, 'MediumEnemy': 35,
                  'HardEnemy': 55}
@@ -51,9 +48,7 @@ constForestTrip = {'EasyEnemy': 10, 'AnimalEnemy': 90}
 constArenaAnimal = {'AnimalEnemy': 100}
 # random functions for bosses
 constEasyBoss = {'EasyEnemy': 30, 'MediumEnemy': 70}
-# FOR TESTS:
-#constMediumBoss = {'MediumEnemy': 20, 'HardEnemy': 80}
-constMediumBoss = {'MediumEnemy': 100, 'HardEnemy': 80}
+constMediumBoss = {'MediumEnemy': 20, 'HardEnemy': 80}
 constHardBoss = {'HardEnemy': 40, 'UniqueEnemy': 60}
 constVeryHardBoss = {'HardEnemy': 10, 'UniqueEnemy': 90}
 # Names of places
@@ -328,6 +323,12 @@ constHeavyArmour = ({'Name': 'Iron armour', 'Description': """Cheap heavy armour
                      it? Yeah, but it's weight - brrrr.""", 'Price': 75726, 'HealthBoost': 170,
                      'SpeedBoost': -80})
 
+constBerserkerWeapon = ({'Name': 'Dual axes', 'Description': """Good sharpened axes. Professional can use them 
+                         with wind speed""", 'Price': 0, 'Damage': (15, 22), 'AttackSpeed': 40}, )
+constBerserkerArmour = ({'Name': 'Bear pelt', 'Description': """Fresh pelt from bear. Stinky, warm and bloody.
+                         only true berserker can wear it.""", 'Price': 0, 'HealthBoost': 50,
+                         'SpeedBoost': 50}, )
+
 constAnyArmour = (constClothesArmour, constLightArmour, constHeavyArmour)
 
 # Hero starting items
@@ -491,6 +492,20 @@ constMediumEnemy = ({'Name': 'Thug', 'Description': """You see a thug. He is goi
                       'Weapon': (constNoneWeapon, ), 'Armour': (constNoneArmour, ),
                       'CommonTrait': {'Vitality': 0, 'Strength': 0, 'Accuracy': 60, 'Luck': 15,
                       'Agility': 25, 'Intelligence': 0, 'Instinct': 0}})
+
+constHardEnemy = ({'Name': 'Troll', 'Description': """You see a enormous troll. He is going to have a breakfast. 
+                     You\'re so tasty!""", 'Health': 200, 'Damage': (10, 25), 'Levels': (30, 50),
+                     'Gold': (0, 0), 'Weapon': (constNoneWeapon, ),
+                     'Armour': (constNoneArmour, ), 'CommonTrait': {'Vitality': 30,
+                     'Strength': 35, 'Accuracy': 25, 'Luck': 0, 'Agility': 0,
+                     'Intelligence': 0, 'Instinct': 10}}, )
+
+constUniqueEnemy = ({'Name': 'Berserker in range', 'Description': """You see a berserker in range. He\'s crashing 
+                     everything on his way. You\'re next!""", 'Health': 50, 'Damage': (1, 3), 'Levels': (50, 50),
+                     'Gold': (0, 0), 'Weapon': (constBerserkerWeapon, ),
+                     'Armour': (constBerserkerArmour, ), 'CommonTrait': {'Vitality': 20,
+                     'Strength': 25, 'Accuracy': 20, 'Luck': 5, 'Agility': 20,
+                     'Intelligence': 0, 'Instinct': 0}}, )
 
 constArenaDueler = ({'Name': 'Dueler', 'Description': "", 'Health': 50,
                      'Damage': (1, 3), 'Gold': (0, 0),
